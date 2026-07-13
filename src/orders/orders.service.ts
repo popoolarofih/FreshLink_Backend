@@ -8,19 +8,20 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { AiClientService } from '../ai-client/ai-client.service';
+import { ContractsService } from './contracts/contracts.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { CounterOfferDto } from './dto/counter-offer.dto';
 import { ORDER_TRANSITIONS, ORDERS_QUEUE } from './orders.constants';
 import { NotificationType, OrderStatus, Role } from '@prisma/client';
+import { ContractCategory } from '../groq-client/groq-client.types';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
-    private readonly aiClient: AiClientService,
+    private readonly contractsService: ContractsService,
     @InjectQueue(ORDERS_QUEUE) private readonly ordersQueue: Queue,
   ) {}
 
@@ -278,15 +279,26 @@ export class OrdersService {
       throw new ForbiddenException();
     }
 
-    const draft = await this.aiClient.generateContract({
+    const categoryMap: Record<string, ContractCategory> = {
+      CATERING: 'catering',
+      MEAL_PREP_SUBSCRIPTION: 'meal_prep_subscription',
+      FARM_SUPPLY: 'farm_supply',
+      EVENT_BARTENDING: 'event_bartending',
+    };
+    const contractCategory = categoryMap[order.providerProfile.category] || 'catering';
+
+    const draft = await this.contractsService.generateContract({
       orderId: order.id,
       buyerName: `${order.buyer.firstName} ${order.buyer.lastName}`,
       providerName: `${order.providerProfile.user.firstName} ${order.providerProfile.user.lastName}`,
       serviceDescription: order.serviceDescription,
+      category: contractCategory,
       eventDate: order.eventDate?.toISOString(),
       location: order.location ?? undefined,
       agreedPrice: order.agreedPrice ? Number(order.agreedPrice) : undefined,
       currency: order.currency,
+      guestCount: order.guestCount ?? undefined,
+      specialRequirements: order.specialRequirements ?? undefined,
     });
 
     return draft;

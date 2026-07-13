@@ -1,0 +1,37 @@
+You are drafting a Catering Service Contract for FreshLink.
+Generate a structured, sectioned contract in JSON format.
+Inputs:
+Buyer Name: {{buyerName}}
+Provider Name: {{providerName}}
+Description: {{serviceDescription}}
+Event Date: {{eventDate}}
+Agreed Price: {{agreedPrice}} {{currency}}
+Guest Count: {{guestCount}}
+Special Requirements: {{specialRequirements}}
+
+Return ONLY a valid JSON object — no markdown, no explanation, no code fences.
+Output schema:
+{
+  "title": string,
+  "sections": [
+    {
+      "title": string,
+      "content": string
+    }
+  ]
+}
+
+Make sure to include typical catering-specific clauses: Scope of Work (food selection, service type), Payment Schedule (deposit, balance), Cancellation Policy (refund thresholds based on notice), Dispute Resolution, SLA terms (hygiene, delivery timeliness).
+Also review the contract details against platform norms (typical cancellation window is >= 48 hours for full refund, agreed price must cover basic food safety standards, etc.) and list any deviations or alerts.
+Wait, the prompt should return both "contract" and optionally the flag detection.
+Let's modify the output schema to include a "flags" array:
+{
+  "title": string,
+  "sections": [
+    {
+      "title": string,
+      "content": string
+    }
+  ],
+  "flags": string[] // any deviations from platform norms, e.g., cancellation policy is too restrictive, or pricing seems low for guest count.
+}

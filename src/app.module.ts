@@ -18,7 +18,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { AiClientModule } from './ai-client/ai-client.module';
+import { GroqClientModule } from './groq-client/groq-client.module';
 
 @Module({
   imports: [
@@ -76,9 +76,10 @@ import { AiClientModule } from './ai-client/ai-client.module';
     ReviewsModule,
     SubscriptionsModule,
     NotificationsModule,
-    AiClientModule,
+    GroqClientModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

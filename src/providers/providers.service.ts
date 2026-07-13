@@ -8,10 +8,42 @@ import { UpdateProviderProfileDto } from './dto/update-provider-profile.dto';
 import { AddPortfolioItemDto } from './dto/add-portfolio-item.dto';
 import { AddPricingItemDto } from './dto/add-pricing-item.dto';
 import { AddAvailabilitySlotDto } from './dto/add-availability-slot.dto';
+import { PricingService } from '../pricing/pricing.service';
 
 @Injectable()
 export class ProvidersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly pricingService: PricingService,
+  ) {}
+
+  async getPriceSuggestion(
+    userId: string,
+    category: string,
+    guestCount?: number,
+    durationHours?: number,
+    eventType?: string,
+  ) {
+    const profile = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+      include: { pricingItems: true },
+    });
+    if (!profile) throw new NotFoundException('Provider profile not found.');
+
+    const recentComparablePrices =
+      profile.pricingItems.map((item) => Number(item.basePrice)) || [];
+
+    return this.pricingService.suggestPrice({
+      category,
+      city: profile.city || undefined,
+      providerRating: profile.averageRating || undefined,
+      guestCount,
+      durationHours,
+      eventType,
+      recentComparablePrices,
+    });
+  }
+
 
   // ─────────────────────────────────────────────
   // Profile

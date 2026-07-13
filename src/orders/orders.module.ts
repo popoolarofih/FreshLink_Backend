@@ -5,11 +5,13 @@ import { OrdersController } from './orders.controller';
 import { OrdersProcessor } from './orders.processor';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ORDERS_QUEUE } from './orders.constants';
+import { ContractsModule } from './contracts/contracts.module';
 
 @Module({
   imports: [
     BullModule.registerQueue({ name: ORDERS_QUEUE }),
     NotificationsModule,
+    ContractsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, OrdersProcessor],

@@ -1,0 +1,23 @@
+You are drafting a Meal Prep Subscription Service Contract for FreshLink.
+Generate a structured, sectioned contract in JSON format.
+Inputs:
+Buyer Name: {{buyerName}}
+Provider Name: {{providerName}}
+Description: {{serviceDescription}}
+Agreed Price: {{agreedPrice}} {{currency}}
+Special Requirements: {{specialRequirements}}
+
+Return ONLY a valid JSON object — no markdown, no explanation, no code fences.
+Output schema:
+{
+  "title": string,
+  "sections": [
+    {
+      "title": string,
+      "content": string
+    }
+  ],
+  "flags": string[] // deviations from platform norms, e.g., renewal/cancellation notice window.
+}
+
+Include typical meal-prep subscription clauses: Scope of Work (delivery schedule, dietary preferences), Payment Schedule (recurring billing terms), Cancellation/Pause Policy, Dispute Resolution, SLA terms (freshness, delivery window).

@@ -1,0 +1,25 @@
+You are drafting an Event Bartending Service Contract for FreshLink.
+Generate a structured, sectioned contract in JSON format.
+Inputs:
+Buyer Name: {{buyerName}}
+Provider Name: {{providerName}}
+Description: {{serviceDescription}}
+Event Date: {{eventDate}}
+Agreed Price: {{agreedPrice}} {{currency}}
+Guest Count: {{guestCount}}
+Special Requirements: {{specialRequirements}}
+
+Return ONLY a valid JSON object — no markdown, no explanation, no code fences.
+Output schema:
+{
+  "title": string,
+  "sections": [
+    {
+      "title": string,
+      "content": string
+    }
+  ],
+  "flags": string[] // deviations from platform norms, e.g., age verification verification, licensing requirements.
+}
+
+Include typical event bartending clauses: Scope of Work (drink list, preparation, bar setup/cleanup, supply of glassware/ice/mixers), Licensing & Permits (liquor licensing compliance, age verification responsibility), Payment Schedule, cancellation policy, SLA terms (professional attire, punctuality).

@@ -8,12 +8,13 @@ AI-powered two-sided marketplace connecting food/beverage buyers (individuals, r
 |---|---|
 | Framework | NestJS + TypeScript |
 | Database | PostgreSQL + Prisma ORM (v7) |
-| Cache / Sessions | Redis (ioredis) |
+| Cache / Sessions | Redis (ioredis / @keyv/redis) |
 | Background jobs | BullMQ |
 | Auth | JWT – access + refresh token rotation |
 | Validation | class-validator + class-transformer |
 | Docs | Swagger / OpenAPI (auto-generated) |
 | Payments | Stripe (escrow-shaped); Flutterwave stub |
+| AI / LLM | Groq SDK → Llama 3.1 8B (fast) + Llama 3.3 70B (reasoning) |
 
 ---
 
@@ -135,13 +136,19 @@ Copy `.env.example` → `.env`. Variables marked **REQUIRED TO BOOT** will cause
 |---|---|---|---|
 | `FLUTTERWAVE_SECRET_KEY` | Not used yet | `FLWSECK_TEST-xxx` | Leave as dummy. The `FlutterwaveProvider` class is stubbed — wire it up when ready. |
 
-### AI Microservice
+### Groq LLM Integration
 
 | Variable | Required | Example | Notes |
 |---|---|---|---|
-| `AI_SERVICE_URL` | Optional | `http://localhost:4000` | Base URL of the AI service. Falls back to rule-based logic if unreachable. |
-| `AI_SERVICE_API_KEY` | Optional | any string | Sent as `x-api-key` header on all AI calls. |
-| `AI_SERVICE_TIMEOUT_MS` | Optional | `5000` | Milliseconds before the HTTP call is abandoned. |
+| `GROQ_API_KEY` | **REQUIRED** for AI features | `gsk_...` | Get from [console.groq.com](https://console.groq.com). **Never commit.** If absent, all AI services fall back to rule-based logic automatically. |
+| `GROQ_MODEL_FAST` | Optional | `llama-3.1-8b-instant` | Fast/small model for latency-sensitive paths (search parsing). Swappable without redeployment. |
+| `GROQ_MODEL_REASONING` | Optional | `llama-3.3-70b-versatile` | Reasoning model for quality-critical paths (contracts, pricing rationale, matchmaking). |
+| `GROQ_TIMEOUT_MS` | Optional | `10000` | AbortController timeout per Groq call in ms. |
+| `GROQ_MAX_RETRIES` | Optional | `3` | Retry attempts with exponential backoff before falling back to rule-based logic. |
+
+> **Removed variables** (delete from your `.env`):
+> `AI_SERVICE_URL`, `AI_SERVICE_API_KEY`, `AI_SERVICE_TIMEOUT_MS`
+> The external AI microservice no longer exists — Groq is called in-process with no HTTP hop.
 
 ### Email (stub)
 
@@ -167,12 +174,16 @@ src/
 ├── users/              User profile management, admin user list
 ├── providers/          Provider profiles, portfolio, pricing, availability
 ├── search/             Filterable provider search with AI ranking
+│   ├── matchmaking/    Deterministic score + Groq re-rank + "why this match" reasons
+│   └── search-parsing/ NL query → structured filters (fast Llama model)
 ├── orders/             Order lifecycle state machine, counter-offers, contract drafts
+│   └── contracts/      Category-specific Groq contract generation + platform-norm flags
+├── pricing/            Statistical baseline + Groq seasonality adjustment (±30% clamp)
 ├── payments/           Stripe escrow (hold → release / refund)
-├── reviews/            One review per completed order, denormalized ratings
+├── reviews/            One review per completed order, denormalised ratings
 ├── subscriptions/      Plan management + BullMQ cron for expiry/reminders
 ├── notifications/      DB-persisted notifications + BullMQ delivery queue
-├── ai-client/          AiServiceClient – typed HTTP wrapper with graceful fallbacks
+├── groq-client/        GroqClientService – single SDK wrapper, retry/backoff/logging
 └── prisma/             PrismaService (global)
 ```
 
@@ -196,30 +207,56 @@ PENDING  →  HELD  →  RELEASED
 
 Funds are captured (released) only after the buyer explicitly confirms delivery. Stripe's `capture_method: manual` holds the authorisation until then.
 
-### AI Service Integration Points
+## Groq LLM Architecture
 
-`AiClientService` exposes four typed methods. All fall back gracefully if the AI service is unreachable:
+All AI features run **in-process** — no external microservice, no HTTP hop. The
+`groq-client` module wraps the `groq-sdk` and is the single chokepoint for all
+Groq traffic:
 
-| Method | Fallback |
-|---|---|
-| `rankProviders(buyerContext, candidates)` | Sort by `averageRating` descending |
-| `suggestPrice(serviceContext)` | Static `50 000 – 500 000 NGN` range |
-| `generateContract(orderContext)` | Minimal plaintext template |
-| `parseSearchQuery(rawQuery)` | Empty filter object (returns all results) |
-
----
-
-## Useful Commands
-
-```bash
-npm run db:migrate       # Create and apply a new migration
-npm run db:push          # Push schema changes without migration history (dev only)
-npm run db:studio        # Open Prisma Studio (GUI)
-npm run seed             # Seed test data
-npm run start:dev        # Start with hot-reload
-npm run build            # Production build
-npm run start:prod       # Run production build
 ```
+GroqClientService  (groq-client/)
+  ├── retry loop (exponential backoff, GROQ_MAX_RETRIES)
+  ├── AbortController timeout (GROQ_TIMEOUT_MS)
+  ├── structured JSON log per call (model, latencyMs, token counts)
+  └── ping() → used by GET /health for reachability check
+
+Consumers:
+  SearchParsingService  → fast model  (NL query → structured filters)
+  MatchmakingService    → fast model  (deterministic score + AI re-rank)
+  PricingService        → reasoning   (stats baseline + seasonality rationale)
+  ContractsService      → reasoning   (category-specific sections + flag pass)
+```
+
+### Graceful Degradation
+
+Every consumer catches `GroqUnavailableException` and falls back automatically:
+
+| Service | Fallback behaviour |
+|---|---|
+| `SearchParsingService` | Returns `{ confidence: 0, rawQuery }` — keyword search still runs |
+| `MatchmakingService` | Returns deterministic weighted scores, logs `aiFallback: true` |
+| `PricingService` | Returns statistical median/IQR range only, logs `aiFallback: true` |
+| `ContractsService` | Returns minimal sectioned template, logs `aiFallback: true` |
+
+### Prompt Templates
+
+All prompt text lives under `prompts/` at the project root — never inlined in
+service code. Category-specific contract prompts are in `prompts/contracts/`.
+Swap a prompt without touching TypeScript.
+
+### Health Check
+
+`GET /api/v1/health` now returns:
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-01-01T00:00:00.000Z",
+  "groq": { "reachable": true, "model": "llama-3.1-8b-instant", "latencyMs": 412 }
+}
+```
+
+`status` stays `"ok"` even when `groq.reachable` is `false` — the app runs in
+degraded (rule-based) mode without Groq.
 
 ---
 
@@ -228,4 +265,5 @@ npm run start:prod       # Run production build
 - **Swap payment provider**: implement `IPaymentProvider` in `src/payments/payment-provider.interface.ts`, then replace `StripeProvider` in `payments.module.ts`.
 - **Real email delivery**: replace the `console.log` stub in `notifications.processor.ts` with your provider (Resend, Postmark, Nodemailer).
 - **Real push/SMS**: same processor — add FCM / Twilio calls.
-- **AI service**: any HTTP service that implements the four routes (`/rank-providers`, `/suggest-price`, `/generate-contract`, `/parse-search`) with the expected request/response shapes in `ai-client.types.ts`.
+- **Swap LLM**: update `GROQ_MODEL_FAST` / `GROQ_MODEL_REASONING` env vars to any model available on Groq. No code change required.
+- **Custom prompt tuning**: edit files under `prompts/` — no TypeScript changes needed.

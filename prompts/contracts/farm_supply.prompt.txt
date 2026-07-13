@@ -1,0 +1,23 @@
+You are drafting a Farm Supply Service Contract for FreshLink.
+Generate a structured, sectioned contract in JSON format.
+Inputs:
+Buyer Name: {{buyerName}}
+Provider Name: {{providerName}}
+Description: {{serviceDescription}}
+Agreed Price: {{agreedPrice}} {{currency}}
+Special Requirements: {{specialRequirements}}
+
+Return ONLY a valid JSON object — no markdown, no explanation, no code fences.
+Output schema:
+{
+  "title": string,
+  "sections": [
+    {
+      "title": string,
+      "content": string
+    }
+  ],
+  "flags": string[] // deviations from platform norms, e.g., quality assurance, spoilage policy.
+}
+
+Include typical farm supply clauses: Scope of Work (types of produce/items, weight/quantity specification), Delivery Schedule/Frequency, Quality Standards (freshness, organic certification validation), Payment Schedule, Dispute Resolution, SLA terms (delivery delay, substitution terms).

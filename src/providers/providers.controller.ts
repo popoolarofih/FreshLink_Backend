@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -81,6 +82,25 @@ export class ProvidersController {
   @ApiOperation({ summary: 'Remove a pricing item' })
   removePricingItem(@CurrentUser() user: any, @Param('itemId') itemId: string) {
     return this.providersService.removePricingItem(user.id, itemId);
+  }
+
+  @Get('me/price-suggestion')
+  @Roles(Role.PROVIDER)
+  @ApiOperation({ summary: 'Get price suggestions for a category' })
+  getPriceSuggestion(
+    @CurrentUser() user: any,
+    @Query('category') category: string,
+    @Query('guestCount') guestCount?: number,
+    @Query('durationHours') durationHours?: number,
+    @Query('eventType') eventType?: string,
+  ) {
+    return this.providersService.getPriceSuggestion(
+      user.id,
+      category,
+      guestCount,
+      durationHours,
+      eventType,
+    );
   }
 
   // ── Availability ─────────────────────────────────────────────────────────

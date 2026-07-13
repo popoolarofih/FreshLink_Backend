@@ -1,35 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AiClientService } from '../ai-client/ai-client.service';
+import { SearchParsingService } from './search-parsing/search-parsing.service';
+import { MatchmakingService } from './matchmaking/matchmaking.service';
 import { SearchProvidersDto } from './dto/search-providers.dto';
-import { SearchFilters } from '../ai-client/ai-client.types';
+import { ParsedSearchFilters, CandidateProvider } from '../groq-client/groq-client.types';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class SearchService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly aiClient: AiClientService,
+    private readonly searchParsing: SearchParsingService,
+    private readonly matchmaking: MatchmakingService,
   ) {}
 
   async searchProviders(dto: SearchProvidersDto, buyerId?: string) {
     // ── Step 1: build filter params ──────────────────────────────────────────
     // If a natural-language query is present, run it through the AI parser.
     // Explicit DTO fields override AI-parsed values (caller intent wins).
-    let aiFilters: SearchFilters = {};
+    let aiFilters: Partial<ParsedSearchFilters> = {};
     if (dto.q) {
-      aiFilters = await this.aiClient.parseSearchQuery(dto.q);
+      aiFilters = await this.searchParsing.parseQuery(dto.q);
     }
 
-    const mergedFilters: SearchFilters = {
-      category: dto.category ?? (aiFilters.category as any),
-      city: dto.city ?? aiFilters.city,
-      minPrice: dto.minPrice ?? aiFilters.minPrice,
+    const mergedFilters = {
+      category: dto.category ?? aiFilters.category,
+      city: dto.city ?? aiFilters.location,
+      minPrice: dto.minPrice,
       maxPrice: dto.maxPrice ?? aiFilters.maxPrice,
-      tags: dto.tags ?? aiFilters.tags,
-      minRating: dto.rating ?? aiFilters.minRating,
-      availableFrom: dto.availableFrom ?? aiFilters.availableFrom,
-      availableTo: dto.availableTo ?? aiFilters.availableTo,
+      tags: dto.tags ?? [
+        ...(aiFilters.dietaryTags || []),
+        ...(aiFilters.cuisineTags || []),
+      ],
+      minRating: dto.rating,
+      availableFrom: dto.availableFrom ?? aiFilters.dateFrom,
+      availableTo: dto.availableTo ?? aiFilters.dateTo,
     };
 
     // ── Step 2: build Prisma where clause ────────────────────────────────────
@@ -107,8 +112,9 @@ export class SearchService {
     // ── Step 4: optional AI ranking ──────────────────────────────────────────
     let ranked = providers;
     if (dto.sortBy === 'ai' || !dto.sortBy) {
-      const candidates = providers.map((p) => ({
+      const candidates: CandidateProvider[] = providers.map((p) => ({
         id: p.id,
+        name: `${p.user.firstName} ${p.user.lastName}`,
         category: p.category,
         averageRating: p.averageRating,
         city: p.city ?? undefined,
@@ -116,10 +122,15 @@ export class SearchService {
           ? Number(p.pricingItems[0].basePrice)
           : undefined,
         tags: p.dietaryTags.map((t) => t.tag.name),
+        isAvailable: p.isAvailable,
       }));
 
-      const rankedResult = await this.aiClient.rankProviders(
-        { buyerId: buyerId ?? 'anonymous', location: dto.city },
+      const rankedResult = await this.matchmaking.rankProviders(
+        {
+          buyerId: buyerId ?? 'anonymous',
+          location: dto.city,
+          budget: dto.maxPrice,
+        },
         candidates,
       );
 
