@@ -1,0 +1,394 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// FreshLink – Prisma Schema  (PostgreSQL)
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────
+
+enum Role {
+  BUYER
+  PROVIDER
+  ADMIN
+}
+
+enum ProviderCategory {
+  FARMER
+  CHEF
+  BAKER
+  CATERER
+  MEAL_PREP
+  BARTENDER
+}
+
+enum OrderStatus {
+  REQUESTED
+  CONFIRMED
+  CONTRACT_SIGNED
+  IN_PROGRESS
+  DELIVERED
+  REVIEWED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+enum SubscriptionPlan {
+  BASIC      // provider tier
+  PREMIUM    // provider tier
+  BUSINESS   // B2B buyer tier
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  TRIAL
+}
+
+enum NotificationType {
+  ORDER_STATUS_CHANGE
+  PAYMENT_UPDATE
+  REVIEW_RECEIVED
+  SUBSCRIPTION_RENEWAL
+  SUBSCRIPTION_EXPIRED
+  GENERAL
+}
+
+// ─────────────────────────────────────
+// USER  (shared table for all roles)
+// ─────────────────────────────────────
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  passwordHash      String
+  role              Role
+  firstName         String
+  lastName          String
+  phone             String?
+  avatarUrl         String?
+  isEmailVerified   Boolean   @default(false)
+  emailVerifyToken  String?   @unique
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  providerProfile   ProviderProfile?
+  buyerProfile      BuyerProfile?
+  refreshTokens     RefreshToken[]
+  ordersAsBuyer     Order[]         @relation("BuyerOrders")
+  reviewsWritten    Review[]        @relation("ReviewAuthor")
+  notifications     Notification[]
+  subscription      Subscription?
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────
+// REFRESH TOKENS
+// ─────────────────────────────────────
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  tokenHash   String    @unique
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────
+// PROVIDER PROFILE
+// ─────────────────────────────────────
+
+model ProviderProfile {
+  id                  String           @id @default(uuid())
+  userId              String           @unique
+  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category            ProviderCategory
+  bio                 String?
+  businessName        String?
+  city                String?
+  stateOrRegion       String?
+  country             String           @default("NG")
+  serviceRadiusKm     Float            @default(20)
+  // Denormalized for fast search sorting
+  averageRating       Float            @default(0)
+  totalReviews        Int              @default(0)
+  // Profile completeness 0-100
+  completenessScore   Int              @default(0)
+  isAvailable         Boolean          @default(true)
+  allowsInstantBook   Boolean          @default(false)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  certifications      Certification[]
+  portfolioItems      PortfolioItem[]
+  pricingItems        PricingItem[]
+  availabilitySlots   AvailabilitySlot[]
+  dietaryTags         ProviderTag[]
+  orders              Order[]          @relation("ProviderOrders")
+  reviews             Review[]         @relation("ProviderReviews")
+
+  @@map("provider_profiles")
+}
+
+model Certification {
+  id                String          @id @default(uuid())
+  providerProfileId String
+  providerProfile   ProviderProfile @relation(fields: [providerProfileId], references: [id], onDelete: Cascade)
+  name              String
+  issuingBody       String?
+  issuedAt          DateTime?
+  expiresAt         DateTime?
+  documentUrl       String?
+  createdAt         DateTime        @default(now())
+
+  @@map("certifications")
+}
+
+model PortfolioItem {
+  id                String          @id @default(uuid())
+  providerProfileId String
+  providerProfile   ProviderProfile @relation(fields: [providerProfileId], references: [id], onDelete: Cascade)
+  title             String
+  description       String?
+  mediaUrl          String
+  mediaType         String          @default("image") // image | video
+  createdAt         DateTime        @default(now())
+
+  @@map("portfolio_items")
+}
+
+model PricingItem {
+  id                String          @id @default(uuid())
+  providerProfileId String
+  providerProfile   ProviderProfile @relation(fields: [providerProfileId], references: [id], onDelete: Cascade)
+  serviceName       String
+  description       String?
+  basePrice         Decimal         @db.Decimal(12, 2)
+  currency          String          @default("NGN")
+  unit              String          @default("per event") // per hour, per person, per event
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("pricing_items")
+}
+
+model AvailabilitySlot {
+  id                String          @id @default(uuid())
+  providerProfileId String
+  providerProfile   ProviderProfile @relation(fields: [providerProfileId], references: [id], onDelete: Cascade)
+  startTime         DateTime
+  endTime           DateTime
+  isBooked          Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+
+  @@map("availability_slots")
+}
+
+// Tags shared between providers and buyer search filters
+model Tag {
+  id        String        @id @default(uuid())
+  name      String        @unique // e.g. "vegan", "halal", "gluten-free", "cocktails"
+  providers ProviderTag[]
+
+  @@map("tags")
+}
+
+model ProviderTag {
+  providerProfileId String
+  tagId             String
+  providerProfile   ProviderProfile @relation(fields: [providerProfileId], references: [id], onDelete: Cascade)
+  tag               Tag             @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([providerProfileId, tagId])
+  @@map("provider_tags")
+}
+
+// ─────────────────────────────────────
+// BUYER PROFILE
+// ─────────────────────────────────────
+
+model BuyerProfile {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName   String?   // for B2B (restaurants, hotels, corporate)
+  buyerType     String    @default("individual") // individual | restaurant | hotel | corporate
+  address       String?
+  city          String?
+  country       String    @default("NG")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("buyer_profiles")
+}
+
+// ─────────────────────────────────────
+// ORDER  (booking / order management)
+// ─────────────────────────────────────
+
+model Order {
+  id                String          @id @default(uuid())
+  buyerId           String
+  buyer             User            @relation("BuyerOrders", fields: [buyerId], references: [id])
+  providerProfileId String
+  providerProfile   ProviderProfile @relation("ProviderOrders", fields: [providerProfileId], references: [id])
+
+  status            OrderStatus     @default(REQUESTED)
+  serviceDescription String
+  eventDate         DateTime?
+  guestCount        Int?
+  location          String?
+
+  // Pricing negotiation
+  initialQuote      Decimal?        @db.Decimal(12, 2)
+  counterOffer      Decimal?        @db.Decimal(12, 2)
+  agreedPrice       Decimal?        @db.Decimal(12, 2)
+  currency          String          @default("NGN")
+  isInstantBooking  Boolean         @default(false)
+
+  // AI-generated contract reference
+  contractDraftUrl  String?
+  contractSignedAt  DateTime?
+
+  specialRequirements String?
+  notes               String?
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  statusHistory     OrderStatusHistory[]
+  payment           Payment?
+  review            Review?
+
+  @@map("orders")
+}
+
+model OrderStatusHistory {
+  id        String      @id @default(uuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromStatus OrderStatus?
+  toStatus  OrderStatus
+  note      String?
+  changedAt DateTime    @default(now())
+
+  @@map("order_status_history")
+}
+
+// ─────────────────────────────────────
+// PAYMENT  (escrow-shaped)
+// ─────────────────────────────────────
+
+model Payment {
+  id                  String        @id @default(uuid())
+  orderId             String        @unique
+  order               Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  status              PaymentStatus @default(PENDING)
+  amount              Decimal       @db.Decimal(12, 2)
+  currency            String        @default("NGN")
+
+  // Stripe
+  stripePaymentIntentId String?     @unique
+  stripeChargeId        String?
+
+  // Flutterwave (TODO – not wired up yet)
+  flutterwaveRef        String?
+
+  provider              String      @default("stripe") // stripe | flutterwave
+  heldAt                DateTime?
+  releasedAt            DateTime?
+  refundedAt            DateTime?
+
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@map("payments")
+}
+
+// ─────────────────────────────────────
+// REVIEW & RATING
+// ─────────────────────────────────────
+
+model Review {
+  id                String          @id @default(uuid())
+  orderId           String          @unique
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  authorId          String
+  author            User            @relation("ReviewAuthor", fields: [authorId], references: [id])
+  providerProfileId String
+  providerProfile   ProviderProfile @relation("ProviderReviews", fields: [providerProfileId], references: [id])
+
+  rating            Int             // 1-5
+  comment           String?
+  isPublished       Boolean         @default(true)
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@map("reviews")
+}
+
+// ─────────────────────────────────────
+// SUBSCRIPTION
+// ─────────────────────────────────────
+
+model Subscription {
+  id          String             @id @default(uuid())
+  userId      String             @unique
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan        SubscriptionPlan
+  status      SubscriptionStatus @default(TRIAL)
+  startedAt   DateTime           @default(now())
+  expiresAt   DateTime
+  renewedAt   DateTime?
+  cancelledAt DateTime?
+
+  stripeSubscriptionId  String?  @unique
+  stripeCustomerId      String?
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@map("subscriptions")
+}
+
+// ─────────────────────────────────────
+// NOTIFICATION
+// ─────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String
+  data      Json?            // arbitrary payload (orderId, paymentId, etc.)
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead])
+  @@map("notifications")
+}
