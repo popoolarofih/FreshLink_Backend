@@ -52,6 +52,9 @@ let OrdersController = class OrdersController {
     contractDraft(user, id) {
         return this.ordersService.requestContractDraft(id, user.id);
     }
+    signContract(user, id) {
+        return this.ordersService.signContract(id, user.id, user.role);
+    }
 };
 exports.OrdersController = OrdersController;
 __decorate([
@@ -135,6 +138,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "contractDraft", null);
+__decorate([
+    (0, common_1.Post)(':id/contract/sign'),
+    (0, swagger_1.ApiOperation)({ summary: 'Sign the contract for an order (buyer or provider)' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], OrdersController.prototype, "signContract", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, swagger_1.ApiTags)('Orders'),
     (0, swagger_1.ApiBearerAuth)('access-token'),

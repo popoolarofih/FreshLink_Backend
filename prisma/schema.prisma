@@ -236,6 +236,7 @@ model BuyerProfile {
   buyerType     String    @default("individual") // individual | restaurant | hotel | corporate
   address       String?
   city          String?
+  dietaryPreferences String[] @default([])
   country       String    @default("NG")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -270,6 +271,8 @@ model Order {
   // AI-generated contract reference
   contractDraftUrl  String?
   contractSignedAt  DateTime?
+  isSignedByBuyer     Boolean         @default(false)
+  isSignedByProvider  Boolean         @default(false)
 
   specialRequirements String?
   notes               String?

@@ -30,6 +30,8 @@ export declare class OrdersService {
         isInstantBooking: boolean;
         contractDraftUrl: string | null;
         contractSignedAt: Date | null;
+        isSignedByBuyer: boolean;
+        isSignedByProvider: boolean;
         notes: string | null;
         buyerId: string;
     }>;
@@ -111,6 +113,8 @@ export declare class OrdersService {
         isInstantBooking: boolean;
         contractDraftUrl: string | null;
         contractSignedAt: Date | null;
+        isSignedByBuyer: boolean;
+        isSignedByProvider: boolean;
         notes: string | null;
         buyerId: string;
     }>;
@@ -174,6 +178,8 @@ export declare class OrdersService {
             isInstantBooking: boolean;
             contractDraftUrl: string | null;
             contractSignedAt: Date | null;
+            isSignedByBuyer: boolean;
+            isSignedByProvider: boolean;
             notes: string | null;
             buyerId: string;
         })[];
@@ -225,6 +231,8 @@ export declare class OrdersService {
             isInstantBooking: boolean;
             contractDraftUrl: string | null;
             contractSignedAt: Date | null;
+            isSignedByBuyer: boolean;
+            isSignedByProvider: boolean;
             notes: string | null;
             buyerId: string;
         })[];
@@ -233,6 +241,66 @@ export declare class OrdersService {
         limit: number;
     }>;
     updateStatus(orderId: string, requesterId: string, requesterRole: Role, dto: UpdateOrderStatusDto): Promise<{
+        providerProfile: {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            city: string | null;
+            country: string;
+            category: import(".prisma/client").$Enums.ProviderCategory;
+            bio: string | null;
+            businessName: string | null;
+            stateOrRegion: string | null;
+            serviceRadiusKm: number;
+            averageRating: number;
+            totalReviews: number;
+            completenessScore: number;
+            isAvailable: boolean;
+            allowsInstantBook: boolean;
+            userId: string;
+        };
+        payment: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            currency: string;
+            status: import(".prisma/client").$Enums.PaymentStatus;
+            amount: import("@prisma/client-runtime-utils").Decimal;
+            orderId: string;
+            stripePaymentIntentId: string | null;
+            stripeChargeId: string | null;
+            flutterwaveRef: string | null;
+            provider: string;
+            heldAt: Date | null;
+            releasedAt: Date | null;
+            refundedAt: Date | null;
+        } | null;
+        review: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            providerProfileId: string;
+            rating: number;
+            orderId: string;
+            authorId: string;
+            comment: string | null;
+            isPublished: boolean;
+        } | null;
+        statusHistory: {
+            id: string;
+            note: string | null;
+            fromStatus: import(".prisma/client").$Enums.OrderStatus | null;
+            toStatus: import(".prisma/client").$Enums.OrderStatus;
+            changedAt: Date;
+            orderId: string;
+        }[];
+    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -250,6 +318,8 @@ export declare class OrdersService {
         isInstantBooking: boolean;
         contractDraftUrl: string | null;
         contractSignedAt: Date | null;
+        isSignedByBuyer: boolean;
+        isSignedByProvider: boolean;
         notes: string | null;
         buyerId: string;
     }>;
@@ -271,6 +341,8 @@ export declare class OrdersService {
         isInstantBooking: boolean;
         contractDraftUrl: string | null;
         contractSignedAt: Date | null;
+        isSignedByBuyer: boolean;
+        isSignedByProvider: boolean;
         notes: string | null;
         buyerId: string;
     }>;
@@ -292,8 +364,93 @@ export declare class OrdersService {
         isInstantBooking: boolean;
         contractDraftUrl: string | null;
         contractSignedAt: Date | null;
+        isSignedByBuyer: boolean;
+        isSignedByProvider: boolean;
         notes: string | null;
         buyerId: string;
     }>;
     requestContractDraft(orderId: string, requesterId: string): Promise<import("../groq-client/groq-client.types").ContractDraft>;
+    signContract(orderId: string, requesterId: string, requesterRole: Role): Promise<{
+        providerProfile: {
+            user: {
+                id: string;
+                firstName: string;
+                lastName: string;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            city: string | null;
+            country: string;
+            category: import(".prisma/client").$Enums.ProviderCategory;
+            bio: string | null;
+            businessName: string | null;
+            stateOrRegion: string | null;
+            serviceRadiusKm: number;
+            averageRating: number;
+            totalReviews: number;
+            completenessScore: number;
+            isAvailable: boolean;
+            allowsInstantBook: boolean;
+            userId: string;
+        };
+        payment: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            currency: string;
+            status: import(".prisma/client").$Enums.PaymentStatus;
+            amount: import("@prisma/client-runtime-utils").Decimal;
+            orderId: string;
+            stripePaymentIntentId: string | null;
+            stripeChargeId: string | null;
+            flutterwaveRef: string | null;
+            provider: string;
+            heldAt: Date | null;
+            releasedAt: Date | null;
+            refundedAt: Date | null;
+        } | null;
+        review: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            providerProfileId: string;
+            rating: number;
+            orderId: string;
+            authorId: string;
+            comment: string | null;
+            isPublished: boolean;
+        } | null;
+        statusHistory: {
+            id: string;
+            note: string | null;
+            fromStatus: import(".prisma/client").$Enums.OrderStatus | null;
+            toStatus: import(".prisma/client").$Enums.OrderStatus;
+            changedAt: Date;
+            orderId: string;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        providerProfileId: string;
+        currency: string;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        guestCount: number | null;
+        location: string | null;
+        serviceDescription: string;
+        eventDate: Date | null;
+        agreedPrice: import("@prisma/client-runtime-utils").Decimal | null;
+        specialRequirements: string | null;
+        initialQuote: import("@prisma/client-runtime-utils").Decimal | null;
+        counterOffer: import("@prisma/client-runtime-utils").Decimal | null;
+        isInstantBooking: boolean;
+        contractDraftUrl: string | null;
+        contractSignedAt: Date | null;
+        isSignedByBuyer: boolean;
+        isSignedByProvider: boolean;
+        notes: string | null;
+        buyerId: string;
+    }>;
 }

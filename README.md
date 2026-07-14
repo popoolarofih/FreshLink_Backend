@@ -85,8 +85,8 @@ This creates 3 buyers and 6 providers across all categories with availability sl
 npm run start:dev
 ```
 
-- API base: `http://localhost:3000/api/v1`
-- Swagger docs: `http://localhost:3000/api/docs`
+- API base: `http://localhost:3001/api/v1`
+- Swagger docs: `http://localhost:3001/api/docs`
 
 ---
 
@@ -98,7 +98,7 @@ Copy `.env.example` → `.env`. Variables marked **REQUIRED TO BOOT** will cause
 
 | Variable | Required | Example | Notes |
 |---|---|---|---|
-| `PORT` | Optional | `3000` | HTTP port |
+| `PORT` | Optional | `3001` | HTTP port |
 | `NODE_ENV` | Optional | `development` | `development` \| `production` \| `test` |
 
 ### Database

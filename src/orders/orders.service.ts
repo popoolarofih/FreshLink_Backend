@@ -174,34 +174,85 @@ export class OrdersService {
       );
     }
 
+    let isSignedByBuyer = order.isSignedByBuyer;
+    let isSignedByProvider = order.isSignedByProvider;
+    let targetStatus = order.status;
+    let shouldAdvance = true;
+
+    if (dto.status === OrderStatus.CONTRACT_SIGNED) {
+      if (isBuyer) isSignedByBuyer = true;
+      if (isProvider) isSignedByProvider = true;
+      if (isAdmin) {
+        isSignedByBuyer = true;
+        isSignedByProvider = true;
+      }
+
+      if (isSignedByBuyer && isSignedByProvider) {
+        targetStatus = OrderStatus.CONTRACT_SIGNED;
+      } else {
+        shouldAdvance = false;
+      }
+    } else {
+      targetStatus = dto.status;
+    }
+
     const updated = await this.prisma.order.update({
       where: { id: orderId },
       data: {
-        status: dto.status,
-        ...(dto.status === OrderStatus.CONTRACT_SIGNED && { contractSignedAt: new Date() }),
+        status: targetStatus,
+        isSignedByBuyer,
+        isSignedByProvider,
+        ...(targetStatus === OrderStatus.CONTRACT_SIGNED && { contractSignedAt: new Date() }),
         statusHistory: {
           create: {
             fromStatus: order.status,
-            toStatus: dto.status,
-            note: dto.note,
+            toStatus: targetStatus,
+            note: shouldAdvance
+              ? dto.note || `Order status updated to ${targetStatus}`
+              : isBuyer
+              ? 'Contract signed by buyer (awaiting provider signature)'
+              : 'Contract signed by provider (awaiting buyer signature)',
           },
         },
       },
+      include: {
+        providerProfile: {
+          include: { user: { select: { id: true, firstName: true, lastName: true } } },
+        },
+        statusHistory: { orderBy: { changedAt: 'asc' } },
+        payment: true,
+        review: true,
+      },
     });
 
-    // Notify both parties
-    const notifyUserId =
-      isProvider ? order.buyerId : order.providerProfile.userId;
-    await this.notifications.send({
-      userId: notifyUserId,
-      type: NotificationType.ORDER_STATUS_CHANGE,
-      title: 'Order status updated',
-      body: `Order status changed to ${dto.status}.`,
-      data: { orderId },
-    });
+    if (shouldAdvance) {
+      // Notify both parties
+      const notifyUserId =
+        isProvider ? order.buyerId : order.providerProfile.userId;
+      await this.notifications.send({
+        userId: notifyUserId,
+        type: NotificationType.ORDER_STATUS_CHANGE,
+        title: 'Order status updated',
+        body: `Order status changed to ${targetStatus}.`,
+        data: { orderId },
+      });
 
-    // Enqueue any side effects (contract generation, payment triggers)
-    await this.ordersQueue.add('status-changed', { orderId, newStatus: dto.status });
+      // Enqueue any side effects (contract generation, payment triggers)
+      await this.ordersQueue.add('status-changed', { orderId, newStatus: targetStatus });
+    } else {
+      // Notify the counterparty about the signature
+      const notifyUserId =
+        isBuyer ? order.providerProfile.userId : order.buyerId;
+      await this.notifications.send({
+        userId: notifyUserId,
+        type: NotificationType.ORDER_STATUS_CHANGE,
+        title: 'Contract signature updated',
+        body: isBuyer
+          ? 'The buyer has signed the contract. Awaiting your signature.'
+          : 'The provider has signed the contract. Awaiting your signature.',
+        data: { orderId },
+      });
+    }
 
     return updated;
   }
@@ -302,5 +353,12 @@ export class OrdersService {
     });
 
     return draft;
+  }
+
+  async signContract(orderId: string, requesterId: string, requesterRole: Role) {
+    // Reuse the existing state-machine transition logic to mark signatures
+    return this.updateStatus(orderId, requesterId, requesterRole, {
+      status: OrderStatus.CONTRACT_SIGNED,
+    });
   }
 }

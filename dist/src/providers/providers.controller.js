@@ -63,6 +63,7 @@ let ProvidersController = class ProvidersController {
 exports.ProvidersController = ProvidersController;
 __decorate([
     (0, common_1.Get)('me'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Get my provider profile' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -72,6 +73,7 @@ __decorate([
 ], ProvidersController.prototype, "getMyProfile", null);
 __decorate([
     (0, common_1.Patch)('me'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Update my provider profile (including tags)' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -90,6 +92,7 @@ __decorate([
 ], ProvidersController.prototype, "getProfile", null);
 __decorate([
     (0, common_1.Post)('me/portfolio'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Add a portfolio item' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -100,6 +103,7 @@ __decorate([
 ], ProvidersController.prototype, "addPortfolioItem", null);
 __decorate([
     (0, common_1.Delete)('me/portfolio/:itemId'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Remove a portfolio item' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -110,6 +114,7 @@ __decorate([
 ], ProvidersController.prototype, "removePortfolioItem", null);
 __decorate([
     (0, common_1.Post)('me/pricing'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Add a pricing item' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -120,6 +125,7 @@ __decorate([
 ], ProvidersController.prototype, "addPricingItem", null);
 __decorate([
     (0, common_1.Delete)('me/pricing/:itemId'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Remove a pricing item' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -130,6 +136,7 @@ __decorate([
 ], ProvidersController.prototype, "removePricingItem", null);
 __decorate([
     (0, common_1.Get)('me/price-suggestion'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Get price suggestions for a category' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -143,6 +150,7 @@ __decorate([
 ], ProvidersController.prototype, "getPriceSuggestion", null);
 __decorate([
     (0, common_1.Post)('me/availability'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Add an availability slot' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -153,6 +161,7 @@ __decorate([
 ], ProvidersController.prototype, "addSlot", null);
 __decorate([
     (0, common_1.Delete)('me/availability/:slotId'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
     (0, swagger_1.ApiOperation)({ summary: 'Remove an availability slot' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
@@ -164,7 +173,6 @@ __decorate([
 exports.ProvidersController = ProvidersController = __decorate([
     (0, swagger_1.ApiTags)('Providers'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, common_1.Controller)('providers'),
     __metadata("design:paramtypes", [providers_service_1.ProvidersService])
 ], ProvidersController);

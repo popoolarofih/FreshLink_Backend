@@ -87,6 +87,7 @@ export declare class UsersController {
             buyerType: string;
             address: string | null;
             city: string | null;
+            dietaryPreferences: string[];
             country: string;
             userId: string;
         } | null;
@@ -204,6 +205,7 @@ export declare class UsersController {
             buyerType: string;
             address: string | null;
             city: string | null;
+            dietaryPreferences: string[];
             country: string;
             userId: string;
         } | null;

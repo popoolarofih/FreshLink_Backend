@@ -87,6 +87,7 @@ export declare class UsersService {
             buyerType: string;
             address: string | null;
             city: string | null;
+            dietaryPreferences: string[];
             country: string;
             userId: string;
         } | null;

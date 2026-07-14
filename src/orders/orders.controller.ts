@@ -94,4 +94,10 @@ export class OrdersController {
   contractDraft(@CurrentUser() user: any, @Param('id') id: string) {
     return this.ordersService.requestContractDraft(id, user.id);
   }
+
+  @Post(':id/contract/sign')
+  @ApiOperation({ summary: 'Sign the contract for an order (buyer or provider)' })
+  signContract(@CurrentUser() user: any, @Param('id') id: string) {
+    return this.ordersService.signContract(id, user.id, user.role);
+  }
 }

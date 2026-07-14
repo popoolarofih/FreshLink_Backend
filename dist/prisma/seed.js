@@ -50,9 +50,9 @@ async function main() {
     const tagMap = Object.fromEntries(tags.map((t) => [t.name, t.id]));
     console.log('  ✔ Tags created');
     const buyerData = [
-        { email: 'amaka.okafor@example.com', firstName: 'Amaka', lastName: 'Okafor', buyerType: 'individual' },
-        { email: 'heritage.hotel@example.com', firstName: 'Heritage', lastName: 'Hotel', buyerType: 'hotel', companyName: 'Heritage Boutique Hotel' },
-        { email: 'techcorp.events@example.com', firstName: 'TechCorp', lastName: 'Events', buyerType: 'corporate', companyName: 'TechCorp Nigeria Ltd' },
+        { email: 'amaka.okafor@example.com', firstName: 'Amaka', lastName: 'Okafor', buyerType: 'individual', dietaryPreferences: ['vegan'] },
+        { email: 'heritage.hotel@example.com', firstName: 'Heritage', lastName: 'Hotel', buyerType: 'hotel', companyName: 'Heritage Boutique Hotel', dietaryPreferences: ['halal'] },
+        { email: 'techcorp.events@example.com', firstName: 'TechCorp', lastName: 'Events', buyerType: 'corporate', companyName: 'TechCorp Nigeria Ltd', dietaryPreferences: [] },
     ];
     for (const b of buyerData) {
         await prisma.user.upsert({
@@ -70,6 +70,7 @@ async function main() {
                         companyName: b.companyName,
                         city: 'Lagos',
                         country: 'NG',
+                        dietaryPreferences: b.dietaryPreferences || [],
                     },
                 },
             },

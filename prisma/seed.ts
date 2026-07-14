@@ -37,9 +37,9 @@ async function main() {
 
   // ── Buyers ───────────────────────────────────────────────────────────────
   const buyerData = [
-    { email: 'amaka.okafor@example.com', firstName: 'Amaka', lastName: 'Okafor', buyerType: 'individual' },
-    { email: 'heritage.hotel@example.com', firstName: 'Heritage', lastName: 'Hotel', buyerType: 'hotel', companyName: 'Heritage Boutique Hotel' },
-    { email: 'techcorp.events@example.com', firstName: 'TechCorp', lastName: 'Events', buyerType: 'corporate', companyName: 'TechCorp Nigeria Ltd' },
+    { email: 'amaka.okafor@example.com', firstName: 'Amaka', lastName: 'Okafor', buyerType: 'individual', dietaryPreferences: ['vegan'] },
+    { email: 'heritage.hotel@example.com', firstName: 'Heritage', lastName: 'Hotel', buyerType: 'hotel', companyName: 'Heritage Boutique Hotel', dietaryPreferences: ['halal'] },
+    { email: 'techcorp.events@example.com', firstName: 'TechCorp', lastName: 'Events', buyerType: 'corporate', companyName: 'TechCorp Nigeria Ltd', dietaryPreferences: [] },
   ];
 
   for (const b of buyerData) {
@@ -53,12 +53,13 @@ async function main() {
         role: Role.BUYER,
         isEmailVerified: true,
         buyerProfile: {
-          create: {
-            buyerType: b.buyerType,
-            companyName: (b as any).companyName,
-            city: 'Lagos',
-            country: 'NG',
-          },
+            create: {
+              buyerType: b.buyerType,
+              companyName: (b as any).companyName,
+              city: 'Lagos',
+              country: 'NG',
+              dietaryPreferences: (b as any).dietaryPreferences || [],
+            },
         },
       },
       update: {},

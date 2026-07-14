@@ -23,7 +23,6 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('Providers')
 @ApiBearerAuth('access-token')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('providers')
 export class ProvidersController {
   constructor(private readonly providersService: ProvidersService) {}
@@ -31,6 +30,7 @@ export class ProvidersController {
   // ── Own profile ──────────────────────────────────────────────────────────
 
   @Get('me')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Get my provider profile' })
   getMyProfile(@CurrentUser() user: any) {
@@ -38,6 +38,7 @@ export class ProvidersController {
   }
 
   @Patch('me')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Update my provider profile (including tags)' })
   updateMyProfile(@CurrentUser() user: any, @Body() dto: UpdateProviderProfileDto) {
@@ -55,6 +56,7 @@ export class ProvidersController {
   // ── Portfolio ────────────────────────────────────────────────────────────
 
   @Post('me/portfolio')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Add a portfolio item' })
   addPortfolioItem(@CurrentUser() user: any, @Body() dto: AddPortfolioItemDto) {
@@ -62,6 +64,7 @@ export class ProvidersController {
   }
 
   @Delete('me/portfolio/:itemId')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Remove a portfolio item' })
   removePortfolioItem(@CurrentUser() user: any, @Param('itemId') itemId: string) {
@@ -71,6 +74,7 @@ export class ProvidersController {
   // ── Pricing ──────────────────────────────────────────────────────────────
 
   @Post('me/pricing')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Add a pricing item' })
   addPricingItem(@CurrentUser() user: any, @Body() dto: AddPricingItemDto) {
@@ -78,6 +82,7 @@ export class ProvidersController {
   }
 
   @Delete('me/pricing/:itemId')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Remove a pricing item' })
   removePricingItem(@CurrentUser() user: any, @Param('itemId') itemId: string) {
@@ -85,6 +90,7 @@ export class ProvidersController {
   }
 
   @Get('me/price-suggestion')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Get price suggestions for a category' })
   getPriceSuggestion(
@@ -106,6 +112,7 @@ export class ProvidersController {
   // ── Availability ─────────────────────────────────────────────────────────
 
   @Post('me/availability')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Add an availability slot' })
   addSlot(@CurrentUser() user: any, @Body() dto: AddAvailabilitySlotDto) {
@@ -113,6 +120,7 @@ export class ProvidersController {
   }
 
   @Delete('me/availability/:slotId')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Remove an availability slot' })
   removeSlot(@CurrentUser() user: any, @Param('slotId') slotId: string) {

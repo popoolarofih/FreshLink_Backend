@@ -26,6 +26,9 @@ export class AuthService {
   // ──────────────────────────────────────────────
 
   async register(dto: RegisterDto) {
+    if (dto.role === Role.ADMIN) {
+      throw new BadRequestException('Cannot register as ADMIN.');
+    }
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });

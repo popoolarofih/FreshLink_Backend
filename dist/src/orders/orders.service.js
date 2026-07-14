@@ -145,29 +145,80 @@ let OrdersService = class OrdersService {
             throw new common_1.BadRequestException(`Transition from ${order.status} → ${dto.status} is not allowed. ` +
                 `Valid next states: [${allowed.join(', ')}]`);
         }
+        let isSignedByBuyer = order.isSignedByBuyer;
+        let isSignedByProvider = order.isSignedByProvider;
+        let targetStatus = order.status;
+        let shouldAdvance = true;
+        if (dto.status === client_1.OrderStatus.CONTRACT_SIGNED) {
+            if (isBuyer)
+                isSignedByBuyer = true;
+            if (isProvider)
+                isSignedByProvider = true;
+            if (isAdmin) {
+                isSignedByBuyer = true;
+                isSignedByProvider = true;
+            }
+            if (isSignedByBuyer && isSignedByProvider) {
+                targetStatus = client_1.OrderStatus.CONTRACT_SIGNED;
+            }
+            else {
+                shouldAdvance = false;
+            }
+        }
+        else {
+            targetStatus = dto.status;
+        }
         const updated = await this.prisma.order.update({
             where: { id: orderId },
             data: {
-                status: dto.status,
-                ...(dto.status === client_1.OrderStatus.CONTRACT_SIGNED && { contractSignedAt: new Date() }),
+                status: targetStatus,
+                isSignedByBuyer,
+                isSignedByProvider,
+                ...(targetStatus === client_1.OrderStatus.CONTRACT_SIGNED && { contractSignedAt: new Date() }),
                 statusHistory: {
                     create: {
                         fromStatus: order.status,
-                        toStatus: dto.status,
-                        note: dto.note,
+                        toStatus: targetStatus,
+                        note: shouldAdvance
+                            ? dto.note || `Order status updated to ${targetStatus}`
+                            : isBuyer
+                                ? 'Contract signed by buyer (awaiting provider signature)'
+                                : 'Contract signed by provider (awaiting buyer signature)',
                     },
                 },
             },
+            include: {
+                providerProfile: {
+                    include: { user: { select: { id: true, firstName: true, lastName: true } } },
+                },
+                statusHistory: { orderBy: { changedAt: 'asc' } },
+                payment: true,
+                review: true,
+            },
         });
-        const notifyUserId = isProvider ? order.buyerId : order.providerProfile.userId;
-        await this.notifications.send({
-            userId: notifyUserId,
-            type: client_1.NotificationType.ORDER_STATUS_CHANGE,
-            title: 'Order status updated',
-            body: `Order status changed to ${dto.status}.`,
-            data: { orderId },
-        });
-        await this.ordersQueue.add('status-changed', { orderId, newStatus: dto.status });
+        if (shouldAdvance) {
+            const notifyUserId = isProvider ? order.buyerId : order.providerProfile.userId;
+            await this.notifications.send({
+                userId: notifyUserId,
+                type: client_1.NotificationType.ORDER_STATUS_CHANGE,
+                title: 'Order status updated',
+                body: `Order status changed to ${targetStatus}.`,
+                data: { orderId },
+            });
+            await this.ordersQueue.add('status-changed', { orderId, newStatus: targetStatus });
+        }
+        else {
+            const notifyUserId = isBuyer ? order.providerProfile.userId : order.buyerId;
+            await this.notifications.send({
+                userId: notifyUserId,
+                type: client_1.NotificationType.ORDER_STATUS_CHANGE,
+                title: 'Contract signature updated',
+                body: isBuyer
+                    ? 'The buyer has signed the contract. Awaiting your signature.'
+                    : 'The provider has signed the contract. Awaiting your signature.',
+                data: { orderId },
+            });
+        }
         return updated;
     }
     async submitCounterOffer(orderId, providerId, dto) {
@@ -255,6 +306,11 @@ let OrdersService = class OrdersService {
             specialRequirements: order.specialRequirements ?? undefined,
         });
         return draft;
+    }
+    async signContract(orderId, requesterId, requesterRole) {
+        return this.updateStatus(orderId, requesterId, requesterRole, {
+            status: client_1.OrderStatus.CONTRACT_SIGNED,
+        });
     }
 };
 exports.OrdersService = OrdersService;
