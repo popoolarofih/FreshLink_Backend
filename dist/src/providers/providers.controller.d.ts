@@ -217,6 +217,7 @@ export declare class ProvidersController {
         currency: string;
         unit: string;
     }>;
+    getPriceSuggestion(user: any, category: string, guestCount?: number, durationHours?: number, eventType?: string): Promise<import("../groq-client/groq-client.types").PriceSuggestion>;
     addSlot(user: any, dto: AddAvailabilitySlotDto): Promise<{
         id: string;
         createdAt: Date;

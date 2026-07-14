@@ -29,7 +29,7 @@ const payments_module_1 = require("./payments/payments.module");
 const reviews_module_1 = require("./reviews/reviews.module");
 const subscriptions_module_1 = require("./subscriptions/subscriptions.module");
 const notifications_module_1 = require("./notifications/notifications.module");
-const ai_client_module_1 = require("./ai-client/ai-client.module");
+const groq_client_module_1 = require("./groq-client/groq-client.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -81,7 +81,7 @@ exports.AppModule = AppModule = __decorate([
             reviews_module_1.ReviewsModule,
             subscriptions_module_1.SubscriptionsModule,
             notifications_module_1.NotificationsModule,
-            ai_client_module_1.AiClientModule,
+            groq_client_module_1.GroqClientModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

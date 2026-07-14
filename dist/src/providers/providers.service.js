@@ -12,9 +12,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProvidersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const pricing_service_1 = require("../pricing/pricing.service");
 let ProvidersService = class ProvidersService {
-    constructor(prisma) {
+    constructor(prisma, pricingService) {
         this.prisma = prisma;
+        this.pricingService = pricingService;
+    }
+    async getPriceSuggestion(userId, category, guestCount, durationHours, eventType) {
+        const profile = await this.prisma.providerProfile.findUnique({
+            where: { userId },
+            include: { pricingItems: true },
+        });
+        if (!profile)
+            throw new common_1.NotFoundException('Provider profile not found.');
+        const recentComparablePrices = profile.pricingItems.map((item) => Number(item.basePrice)) || [];
+        return this.pricingService.suggestPrice({
+            category,
+            city: profile.city || undefined,
+            providerRating: profile.averageRating || undefined,
+            guestCount,
+            durationHours,
+            eventType,
+            recentComparablePrices,
+        });
     }
     async getProfile(userId) {
         const profile = await this.prisma.providerProfile.findUnique({
@@ -158,6 +178,7 @@ let ProvidersService = class ProvidersService {
 exports.ProvidersService = ProvidersService;
 exports.ProvidersService = ProvidersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        pricing_service_1.PricingService])
 ], ProvidersService);
 //# sourceMappingURL=providers.service.js.map

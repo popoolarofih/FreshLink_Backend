@@ -17,14 +17,14 @@ const common_1 = require("@nestjs/common");
 const bull_1 = require("@nestjs/bull");
 const prisma_service_1 = require("../prisma/prisma.service");
 const notifications_service_1 = require("../notifications/notifications.service");
-const ai_client_service_1 = require("../ai-client/ai-client.service");
+const contracts_service_1 = require("./contracts/contracts.service");
 const orders_constants_1 = require("./orders.constants");
 const client_1 = require("@prisma/client");
 let OrdersService = class OrdersService {
-    constructor(prisma, notifications, aiClient, ordersQueue) {
+    constructor(prisma, notifications, contractsService, ordersQueue) {
         this.prisma = prisma;
         this.notifications = notifications;
-        this.aiClient = aiClient;
+        this.contractsService = contractsService;
         this.ordersQueue = ordersQueue;
     }
     async createOrder(buyerId, dto) {
@@ -234,15 +234,25 @@ let OrdersService = class OrdersService {
         if (order.buyerId !== requesterId && order.providerProfile.userId !== requesterId) {
             throw new common_1.ForbiddenException();
         }
-        const draft = await this.aiClient.generateContract({
+        const categoryMap = {
+            CATERING: 'catering',
+            MEAL_PREP_SUBSCRIPTION: 'meal_prep_subscription',
+            FARM_SUPPLY: 'farm_supply',
+            EVENT_BARTENDING: 'event_bartending',
+        };
+        const contractCategory = categoryMap[order.providerProfile.category] || 'catering';
+        const draft = await this.contractsService.generateContract({
             orderId: order.id,
             buyerName: `${order.buyer.firstName} ${order.buyer.lastName}`,
             providerName: `${order.providerProfile.user.firstName} ${order.providerProfile.user.lastName}`,
             serviceDescription: order.serviceDescription,
+            category: contractCategory,
             eventDate: order.eventDate?.toISOString(),
             location: order.location ?? undefined,
             agreedPrice: order.agreedPrice ? Number(order.agreedPrice) : undefined,
             currency: order.currency,
+            guestCount: order.guestCount ?? undefined,
+            specialRequirements: order.specialRequirements ?? undefined,
         });
         return draft;
     }
@@ -253,6 +263,6 @@ exports.OrdersService = OrdersService = __decorate([
     __param(3, (0, bull_1.InjectQueue)(orders_constants_1.ORDERS_QUEUE)),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         notifications_service_1.NotificationsService,
-        ai_client_service_1.AiClientService, Object])
+        contracts_service_1.ContractsService, Object])
 ], OrdersService);
 //# sourceMappingURL=orders.service.js.map

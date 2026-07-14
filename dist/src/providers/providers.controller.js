@@ -50,6 +50,9 @@ let ProvidersController = class ProvidersController {
     removePricingItem(user, itemId) {
         return this.providersService.removePricingItem(user.id, itemId);
     }
+    getPriceSuggestion(user, category, guestCount, durationHours, eventType) {
+        return this.providersService.getPriceSuggestion(user.id, category, guestCount, durationHours, eventType);
+    }
     addSlot(user, dto) {
         return this.providersService.addAvailabilitySlot(user.id, dto);
     }
@@ -125,6 +128,19 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], ProvidersController.prototype, "removePricingItem", null);
+__decorate([
+    (0, common_1.Get)('me/price-suggestion'),
+    (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get price suggestions for a category' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('category')),
+    __param(2, (0, common_1.Query)('guestCount')),
+    __param(3, (0, common_1.Query)('durationHours')),
+    __param(4, (0, common_1.Query)('eventType')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Number, Number, String]),
+    __metadata("design:returntype", void 0)
+], ProvidersController.prototype, "getPriceSuggestion", null);
 __decorate([
     (0, common_1.Post)('me/availability'),
     (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),

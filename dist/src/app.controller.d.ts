@@ -1,6 +1,6 @@
+import { AppService } from './app.service';
 export declare class AppController {
-    health(): {
-        status: string;
-        timestamp: string;
-    };
+    private readonly appService;
+    constructor(appService: AppService);
+    health(): Promise<Record<string, unknown>>;
 }

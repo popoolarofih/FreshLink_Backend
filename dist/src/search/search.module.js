@@ -10,11 +10,14 @@ exports.SearchModule = void 0;
 const common_1 = require("@nestjs/common");
 const search_service_1 = require("./search.service");
 const search_controller_1 = require("./search.controller");
+const search_parsing_module_1 = require("./search-parsing/search-parsing.module");
+const matchmaking_module_1 = require("./matchmaking/matchmaking.module");
 let SearchModule = class SearchModule {
 };
 exports.SearchModule = SearchModule;
 exports.SearchModule = SearchModule = __decorate([
     (0, common_1.Module)({
+        imports: [search_parsing_module_1.SearchParsingModule, matchmaking_module_1.MatchmakingModule],
         controllers: [search_controller_1.SearchController],
         providers: [search_service_1.SearchService],
     })

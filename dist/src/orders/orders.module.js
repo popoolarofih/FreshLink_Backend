@@ -14,6 +14,7 @@ const orders_controller_1 = require("./orders.controller");
 const orders_processor_1 = require("./orders.processor");
 const notifications_module_1 = require("../notifications/notifications.module");
 const orders_constants_1 = require("./orders.constants");
+const contracts_module_1 = require("./contracts/contracts.module");
 let OrdersModule = class OrdersModule {
 };
 exports.OrdersModule = OrdersModule;
@@ -22,6 +23,7 @@ exports.OrdersModule = OrdersModule = __decorate([
         imports: [
             bull_1.BullModule.registerQueue({ name: orders_constants_1.ORDERS_QUEUE }),
             notifications_module_1.NotificationsModule,
+            contracts_module_1.ContractsModule,
         ],
         controllers: [orders_controller_1.OrdersController],
         providers: [orders_service_1.OrdersService, orders_processor_1.OrdersProcessor],

@@ -12,26 +12,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SearchService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const ai_client_service_1 = require("../ai-client/ai-client.service");
+const search_parsing_service_1 = require("./search-parsing/search-parsing.service");
+const matchmaking_service_1 = require("./matchmaking/matchmaking.service");
 let SearchService = class SearchService {
-    constructor(prisma, aiClient) {
+    constructor(prisma, searchParsing, matchmaking) {
         this.prisma = prisma;
-        this.aiClient = aiClient;
+        this.searchParsing = searchParsing;
+        this.matchmaking = matchmaking;
     }
     async searchProviders(dto, buyerId) {
         let aiFilters = {};
         if (dto.q) {
-            aiFilters = await this.aiClient.parseSearchQuery(dto.q);
+            aiFilters = await this.searchParsing.parseQuery(dto.q);
         }
         const mergedFilters = {
             category: dto.category ?? aiFilters.category,
-            city: dto.city ?? aiFilters.city,
-            minPrice: dto.minPrice ?? aiFilters.minPrice,
+            city: dto.city ?? aiFilters.location,
+            minPrice: dto.minPrice,
             maxPrice: dto.maxPrice ?? aiFilters.maxPrice,
-            tags: dto.tags ?? aiFilters.tags,
-            minRating: dto.rating ?? aiFilters.minRating,
-            availableFrom: dto.availableFrom ?? aiFilters.availableFrom,
-            availableTo: dto.availableTo ?? aiFilters.availableTo,
+            tags: dto.tags ?? [
+                ...(aiFilters.dietaryTags || []),
+                ...(aiFilters.cuisineTags || []),
+            ],
+            minRating: dto.rating,
+            availableFrom: dto.availableFrom ?? aiFilters.dateFrom,
+            availableTo: dto.availableTo ?? aiFilters.dateTo,
         };
         const where = {
             isAvailable: true,
@@ -97,6 +102,7 @@ let SearchService = class SearchService {
         if (dto.sortBy === 'ai' || !dto.sortBy) {
             const candidates = providers.map((p) => ({
                 id: p.id,
+                name: `${p.user.firstName} ${p.user.lastName}`,
                 category: p.category,
                 averageRating: p.averageRating,
                 city: p.city ?? undefined,
@@ -104,8 +110,13 @@ let SearchService = class SearchService {
                     ? Number(p.pricingItems[0].basePrice)
                     : undefined,
                 tags: p.dietaryTags.map((t) => t.tag.name),
+                isAvailable: p.isAvailable,
             }));
-            const rankedResult = await this.aiClient.rankProviders({ buyerId: buyerId ?? 'anonymous', location: dto.city }, candidates);
+            const rankedResult = await this.matchmaking.rankProviders({
+                buyerId: buyerId ?? 'anonymous',
+                location: dto.city,
+                budget: dto.maxPrice,
+            }, candidates);
             const scoreMap = new Map(rankedResult.map((r) => [r.id, r.score]));
             ranked = [...providers].sort((a, b) => (scoreMap.get(b.id) ?? 0) - (scoreMap.get(a.id) ?? 0));
         }
@@ -122,6 +133,7 @@ exports.SearchService = SearchService;
 exports.SearchService = SearchService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        ai_client_service_1.AiClientService])
+        search_parsing_service_1.SearchParsingService,
+        matchmaking_service_1.MatchmakingService])
 ], SearchService);
 //# sourceMappingURL=search.service.js.map

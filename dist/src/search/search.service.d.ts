@@ -1,11 +1,13 @@
 import { PrismaService } from '../prisma/prisma.service';
-import { AiClientService } from '../ai-client/ai-client.service';
+import { SearchParsingService } from './search-parsing/search-parsing.service';
+import { MatchmakingService } from './matchmaking/matchmaking.service';
 import { SearchProvidersDto } from './dto/search-providers.dto';
 import { Prisma } from '@prisma/client';
 export declare class SearchService {
     private readonly prisma;
-    private readonly aiClient;
-    constructor(prisma: PrismaService, aiClient: AiClientService);
+    private readonly searchParsing;
+    private readonly matchmaking;
+    constructor(prisma: PrismaService, searchParsing: SearchParsingService, matchmaking: MatchmakingService);
     searchProviders(dto: SearchProvidersDto, buyerId?: string): Promise<{
         data: ({
             user: {

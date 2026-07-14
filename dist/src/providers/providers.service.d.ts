@@ -3,9 +3,12 @@ import { UpdateProviderProfileDto } from './dto/update-provider-profile.dto';
 import { AddPortfolioItemDto } from './dto/add-portfolio-item.dto';
 import { AddPricingItemDto } from './dto/add-pricing-item.dto';
 import { AddAvailabilitySlotDto } from './dto/add-availability-slot.dto';
+import { PricingService } from '../pricing/pricing.service';
 export declare class ProvidersService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly pricingService;
+    constructor(prisma: PrismaService, pricingService: PricingService);
+    getPriceSuggestion(userId: string, category: string, guestCount?: number, durationHours?: number, eventType?: string): Promise<import("../groq-client/groq-client.types").PriceSuggestion>;
     getProfile(userId: string): Promise<{
         user: {
             email: string;
