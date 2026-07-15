@@ -14,8 +14,8 @@ export declare class PaymentsService {
             updatedAt: Date;
             currency: string;
             status: import(".prisma/client").$Enums.PaymentStatus;
-            amount: import("@prisma/client-runtime-utils").Decimal;
             orderId: string;
+            amount: import("@prisma/client-runtime-utils").Decimal;
             stripePaymentIntentId: string | null;
             stripeChargeId: string | null;
             flutterwaveRef: string | null;
@@ -33,8 +33,8 @@ export declare class PaymentsService {
         updatedAt: Date;
         currency: string;
         status: import(".prisma/client").$Enums.PaymentStatus;
-        amount: import("@prisma/client-runtime-utils").Decimal;
         orderId: string;
+        amount: import("@prisma/client-runtime-utils").Decimal;
         stripePaymentIntentId: string | null;
         stripeChargeId: string | null;
         flutterwaveRef: string | null;
@@ -50,8 +50,8 @@ export declare class PaymentsService {
             updatedAt: Date;
             currency: string;
             status: import(".prisma/client").$Enums.PaymentStatus;
-            amount: import("@prisma/client-runtime-utils").Decimal;
             orderId: string;
+            amount: import("@prisma/client-runtime-utils").Decimal;
             stripePaymentIntentId: string | null;
             stripeChargeId: string | null;
             flutterwaveRef: string | null;
@@ -68,8 +68,8 @@ export declare class PaymentsService {
         updatedAt: Date;
         currency: string;
         status: import(".prisma/client").$Enums.PaymentStatus;
-        amount: import("@prisma/client-runtime-utils").Decimal;
         orderId: string;
+        amount: import("@prisma/client-runtime-utils").Decimal;
         stripePaymentIntentId: string | null;
         stripeChargeId: string | null;
         flutterwaveRef: string | null;

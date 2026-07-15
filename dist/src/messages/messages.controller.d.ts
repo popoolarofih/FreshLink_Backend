@@ -14,8 +14,8 @@ export declare class MessagesController {
     } & {
         id: string;
         createdAt: Date;
-        content: string;
         orderId: string;
+        content: string;
         readAt: Date | null;
         senderId: string;
     }>;
@@ -30,8 +30,8 @@ export declare class MessagesController {
         } & {
             id: string;
             createdAt: Date;
-            content: string;
             orderId: string;
+            content: string;
             readAt: Date | null;
             senderId: string;
         })[];

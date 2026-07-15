@@ -35,6 +35,9 @@ let ProvidersController = class ProvidersController {
     updateMyProfile(user, dto) {
         return this.providersService.updateProfile(user.id, dto);
     }
+    getEarnings(user, page, limit) {
+        return this.providersService.getEarnings(user.id, page ? Number(page) : 1, limit ? Number(limit) : 20);
+    }
     getProfile(id) {
         return this.providersService.getProfileById(id);
     }
@@ -82,6 +85,20 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_provider_profile_dto_1.UpdateProviderProfileDto]),
     __metadata("design:returntype", void 0)
 ], ProvidersController.prototype, "updateMyProfile", null);
+__decorate([
+    (0, common_1.Get)('me/earnings'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.Role.PROVIDER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get my earnings summary' }),
+    (0, swagger_1.ApiQuery)({ name: 'page', required: false, example: 1 }),
+    (0, swagger_1.ApiQuery)({ name: 'limit', required: false, example: 20 }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('page')),
+    __param(2, (0, common_1.Query)('limit')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, String]),
+    __metadata("design:returntype", void 0)
+], ProvidersController.prototype, "getEarnings", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a provider profile by ID (public)' }),

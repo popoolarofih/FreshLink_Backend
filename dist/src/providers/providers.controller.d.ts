@@ -106,6 +106,25 @@ export declare class ProvidersController {
         allowsInstantBook: boolean;
         userId: string;
     }>;
+    getEarnings(user: any, page?: string, limit?: string): Promise<{
+        totalHeld: number;
+        totalReleased: number;
+        totalRefunded: number;
+        currency: string;
+        recentPayments: {
+            orderId: string;
+            amount: number;
+            status: import(".prisma/client").$Enums.PaymentStatus;
+            currency: string;
+            createdAt: Date;
+        }[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
+    }>;
     getProfile(id: string): Promise<{
         user: {
             firstName: string;

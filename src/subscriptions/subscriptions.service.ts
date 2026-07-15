@@ -85,6 +85,14 @@ export class SubscriptionsService {
   }
 
   // ─────────────────────────────────────────────
+  // Plans listing (public reference data)
+  // ─────────────────────────────────────────────
+
+  async getPlans() {
+    return this.prisma.plan.findMany({ orderBy: { priceMonthly: 'asc' } });
+  }
+
+  // ─────────────────────────────────────────────
   // Called by the BullMQ cron job
   // ─────────────────────────────────────────────
 

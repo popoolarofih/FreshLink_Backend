@@ -31,6 +31,8 @@ const subscriptions_module_1 = require("./subscriptions/subscriptions.module");
 const notifications_module_1 = require("./notifications/notifications.module");
 const groq_client_module_1 = require("./groq-client/groq-client.module");
 const messages_module_1 = require("./messages/messages.module");
+const favorites_module_1 = require("./favorites/favorites.module");
+const buyers_module_1 = require("./buyers/buyers.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -84,6 +86,8 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             groq_client_module_1.GroqClientModule,
             messages_module_1.MessagesModule,
+            favorites_module_1.FavoritesModule,
+            buyers_module_1.BuyersModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

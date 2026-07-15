@@ -3,14 +3,23 @@ import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 export declare class SubscriptionsController {
     private readonly subscriptionsService;
     constructor(subscriptionsService: SubscriptionsService);
+    getPlans(): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: import(".prisma/client").$Enums.SubscriptionPlan;
+        priceMonthly: import("@prisma/client-runtime-utils").Decimal;
+        features: string[];
+    }[]>;
     createOrUpgrade(user: any, dto: CreateSubscriptionDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.SubscriptionStatus;
-        expiresAt: Date;
         plan: import(".prisma/client").$Enums.SubscriptionPlan;
+        expiresAt: Date;
         startedAt: Date;
         renewedAt: Date | null;
         cancelledAt: Date | null;
@@ -23,8 +32,8 @@ export declare class SubscriptionsController {
         updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.SubscriptionStatus;
-        expiresAt: Date;
         plan: import(".prisma/client").$Enums.SubscriptionPlan;
+        expiresAt: Date;
         startedAt: Date;
         renewedAt: Date | null;
         cancelledAt: Date | null;
@@ -37,8 +46,8 @@ export declare class SubscriptionsController {
         updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.SubscriptionStatus;
-        expiresAt: Date;
         plan: import(".prisma/client").$Enums.SubscriptionPlan;
+        expiresAt: Date;
         startedAt: Date;
         renewedAt: Date | null;
         cancelledAt: Date | null;

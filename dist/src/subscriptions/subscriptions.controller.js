@@ -23,6 +23,9 @@ let SubscriptionsController = class SubscriptionsController {
     constructor(subscriptionsService) {
         this.subscriptionsService = subscriptionsService;
     }
+    getPlans() {
+        return this.subscriptionsService.getPlans();
+    }
     createOrUpgrade(user, dto) {
         return this.subscriptionsService.createOrUpgrade(user.id, dto);
     }
@@ -35,7 +38,16 @@ let SubscriptionsController = class SubscriptionsController {
 };
 exports.SubscriptionsController = SubscriptionsController;
 __decorate([
+    (0, common_1.Get)('plans'),
+    (0, swagger_1.ApiOperation)({ summary: 'List available subscription plans (public)' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], SubscriptionsController.prototype, "getPlans", null);
+__decorate([
     (0, common_1.Post)(),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, swagger_1.ApiOperation)({ summary: 'Create or upgrade subscription' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __param(1, (0, common_1.Body)()),
@@ -45,6 +57,8 @@ __decorate([
 ], SubscriptionsController.prototype, "createOrUpgrade", null);
 __decorate([
     (0, common_1.Get)('me'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, swagger_1.ApiOperation)({ summary: 'Get my current subscription' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -53,6 +67,8 @@ __decorate([
 ], SubscriptionsController.prototype, "getMySubscription", null);
 __decorate([
     (0, common_1.Delete)('me'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, swagger_1.ApiOperation)({ summary: 'Cancel my subscription' }),
     __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
@@ -61,8 +77,6 @@ __decorate([
 ], SubscriptionsController.prototype, "cancel", null);
 exports.SubscriptionsController = SubscriptionsController = __decorate([
     (0, swagger_1.ApiTags)('Subscriptions'),
-    (0, swagger_1.ApiBearerAuth)('access-token'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('subscriptions'),
     __metadata("design:paramtypes", [subscriptions_service_1.SubscriptionsService])
 ], SubscriptionsController);

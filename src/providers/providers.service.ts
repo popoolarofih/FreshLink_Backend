@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { PaymentStatus } from '@prisma/client';
 import { UpdateProviderProfileDto } from './dto/update-provider-profile.dto';
 import { AddPortfolioItemDto } from './dto/add-portfolio-item.dto';
 import { AddPricingItemDto } from './dto/add-pricing-item.dto';
@@ -91,6 +92,59 @@ export class ProvidersService {
     });
     if (!profile) throw new NotFoundException('Provider profile not found.');
     return profile;
+  }
+
+  // ─────────────────────────────────────────────
+  // Earnings
+  // ─────────────────────────────────────────────
+
+  async getEarnings(userId: string, page: number, limit: number) {
+    const profile = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
+    if (!profile) throw new NotFoundException('Provider profile not found.');
+
+    const orders = await this.prisma.order.findMany({
+      where: { providerProfileId: profile.id },
+      include: { payment: true },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    const payments = orders
+      .filter((o) => o.payment)
+      .map((o) => ({
+        orderId: o.id,
+        amount: Number(o.payment!.amount),
+        status: o.payment!.status,
+        currency: o.payment!.currency,
+        createdAt: o.payment!.createdAt,
+      }));
+
+    const totalHeld = payments
+      .filter((p) => p.status === PaymentStatus.HELD)
+      .reduce((s, p) => s + p.amount, 0);
+
+    const totalReleased = payments
+      .filter((p) => p.status === PaymentStatus.RELEASED)
+      .reduce((s, p) => s + p.amount, 0);
+
+    const totalRefunded = payments
+      .filter((p) => p.status === PaymentStatus.REFUNDED)
+      .reduce((s, p) => s + p.amount, 0);
+
+    const currency = payments[0]?.currency || 'NGN';
+    const total = payments.length;
+    const skip = (page - 1) * limit;
+    const recentPayments = payments.slice(skip, skip + limit);
+
+    return {
+      totalHeld,
+      totalReleased,
+      totalRefunded,
+      currency,
+      recentPayments,
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    };
   }
 
   async updateProfile(userId: string, dto: UpdateProviderProfileDto) {

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProvidersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 const pricing_service_1 = require("../pricing/pricing.service");
 let ProvidersService = class ProvidersService {
     constructor(prisma, pricingService) {
@@ -80,6 +81,48 @@ let ProvidersService = class ProvidersService {
         if (!profile)
             throw new common_1.NotFoundException('Provider profile not found.');
         return profile;
+    }
+    async getEarnings(userId, page, limit) {
+        const profile = await this.prisma.providerProfile.findUnique({
+            where: { userId },
+        });
+        if (!profile)
+            throw new common_1.NotFoundException('Provider profile not found.');
+        const orders = await this.prisma.order.findMany({
+            where: { providerProfileId: profile.id },
+            include: { payment: true },
+            orderBy: { createdAt: 'desc' },
+        });
+        const payments = orders
+            .filter((o) => o.payment)
+            .map((o) => ({
+            orderId: o.id,
+            amount: Number(o.payment.amount),
+            status: o.payment.status,
+            currency: o.payment.currency,
+            createdAt: o.payment.createdAt,
+        }));
+        const totalHeld = payments
+            .filter((p) => p.status === client_1.PaymentStatus.HELD)
+            .reduce((s, p) => s + p.amount, 0);
+        const totalReleased = payments
+            .filter((p) => p.status === client_1.PaymentStatus.RELEASED)
+            .reduce((s, p) => s + p.amount, 0);
+        const totalRefunded = payments
+            .filter((p) => p.status === client_1.PaymentStatus.REFUNDED)
+            .reduce((s, p) => s + p.amount, 0);
+        const currency = payments[0]?.currency || 'NGN';
+        const total = payments.length;
+        const skip = (page - 1) * limit;
+        const recentPayments = payments.slice(skip, skip + limit);
+        return {
+            totalHeld,
+            totalReleased,
+            totalRefunded,
+            currency,
+            recentPayments,
+            pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        };
     }
     async updateProfile(userId, dto) {
         const profile = await this.prisma.providerProfile.findUnique({

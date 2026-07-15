@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { ProvidersService } from './providers.service';
 import { UpdateProviderProfileDto } from './dto/update-provider-profile.dto';
@@ -46,6 +46,26 @@ export class ProvidersController {
     @Body() dto: UpdateProviderProfileDto,
   ) {
     return this.providersService.updateProfile(user.id, dto);
+  }
+
+  // ── Earnings ───────────────────────────────────────────────────────────
+
+  @Get('me/earnings')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.PROVIDER)
+  @ApiOperation({ summary: 'Get my earnings summary' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 20 })
+  getEarnings(
+    @CurrentUser() user: any,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.providersService.getEarnings(
+      user.id,
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 20,
+    );
   }
 
   // ── Public profile by ID ─────────────────────────────────────────────────

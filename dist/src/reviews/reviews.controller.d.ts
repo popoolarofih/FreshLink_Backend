@@ -8,8 +8,8 @@ export declare class ReviewsController {
         createdAt: Date;
         updatedAt: Date;
         providerProfileId: string;
-        rating: number;
         orderId: string;
+        rating: number;
         authorId: string;
         comment: string | null;
         isPublished: boolean;
@@ -26,8 +26,8 @@ export declare class ReviewsController {
             createdAt: Date;
             updatedAt: Date;
             providerProfileId: string;
-            rating: number;
             orderId: string;
+            rating: number;
             authorId: string;
             comment: string | null;
             isPublished: boolean;

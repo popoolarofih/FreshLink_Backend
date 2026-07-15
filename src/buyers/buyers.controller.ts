@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiTags,
   ApiOkResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -12,13 +13,17 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { UpdateBuyerProfileDto } from './dto/update-buyer-profile.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { BuyersService } from './buyers.service';
 
 @ApiTags('Buyers')
 @ApiBearerAuth('access-token')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('buyers')
 export class BuyersController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly buyersService: BuyersService,
+  ) {}
 
   @Get('me')
   @ApiOkResponse({
@@ -77,7 +82,6 @@ export class BuyersController {
     if (dto.city) updates.city = dto.city;
     if (dto.businessName) updates.companyName = dto.businessName;
 
-    // Update user full name if provided
     if (dto.fullName) {
       const [firstName, ...rest] = dto.fullName.split(' ');
       const lastName = rest.join(' ') || '';
@@ -105,5 +109,28 @@ export class BuyersController {
       where: { userId: user.id },
       include: { user: true },
     });
+  }
+
+  @Get('me/analytics')
+  @Roles(Role.BUYER)
+  @ApiOperation({ summary: 'Get buyer spending analytics' })
+  @ApiQuery({
+    name: 'range',
+    required: false,
+    enum: ['30d', '90d', '12m'],
+    description: 'Date range for analytics (default: 30d)',
+  })
+  async getAnalytics(
+    @CurrentUser() user: any,
+    @Query('range') range: string = '30d',
+  ) {
+    return this.buyersService.getAnalytics(user.id, range);
+  }
+
+  @Get('me/reorder-history')
+  @Roles(Role.BUYER)
+  @ApiOperation({ summary: 'Get providers this buyer has ordered from before' })
+  async getReorderHistory(@CurrentUser() user: any) {
+    return this.buyersService.getReorderHistory(user.id);
   }
 }

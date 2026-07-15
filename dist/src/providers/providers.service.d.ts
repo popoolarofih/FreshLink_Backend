@@ -152,6 +152,25 @@ export declare class ProvidersService {
         allowsInstantBook: boolean;
         userId: string;
     }>;
+    getEarnings(userId: string, page: number, limit: number): Promise<{
+        totalHeld: number;
+        totalReleased: number;
+        totalRefunded: number;
+        currency: string;
+        recentPayments: {
+            orderId: string;
+            amount: number;
+            status: import(".prisma/client").$Enums.PaymentStatus;
+            currency: string;
+            createdAt: Date;
+        }[];
+        pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+        };
+    }>;
     updateProfile(userId: string, dto: UpdateProviderProfileDto): Promise<{
         dietaryTags: ({
             tag: {

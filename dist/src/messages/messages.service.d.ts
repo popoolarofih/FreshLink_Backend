@@ -17,8 +17,8 @@ export declare class MessagesService {
     } & {
         id: string;
         createdAt: Date;
-        content: string;
         orderId: string;
+        content: string;
         readAt: Date | null;
         senderId: string;
     }>;
@@ -33,8 +33,8 @@ export declare class MessagesService {
         } & {
             id: string;
             createdAt: Date;
-            content: string;
             orderId: string;
+            content: string;
             readAt: Date | null;
             senderId: string;
         })[];

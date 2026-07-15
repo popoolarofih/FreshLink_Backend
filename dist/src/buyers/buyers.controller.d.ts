@@ -1,8 +1,10 @@
 import { UpdateBuyerProfileDto } from './dto/update-buyer-profile.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { BuyersService } from './buyers.service';
 export declare class BuyersController {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly buyersService;
+    constructor(prisma: PrismaService, buyersService: BuyersService);
     getMe(user: any): Promise<({
         user: {
             email: string;
@@ -49,4 +51,23 @@ export declare class BuyersController {
         country: string;
         userId: string;
     }) | null>;
+    getAnalytics(user: any, range?: string): Promise<{
+        spend: {
+            date: string;
+            amount: number;
+        }[];
+        ordersByCategory: {
+            category: string;
+            count: number;
+        }[];
+        totalSpend: number;
+        totalOrders: number;
+    }>;
+    getReorderHistory(user: any): Promise<{
+        providerProfileId: string;
+        providerName: string;
+        category: string;
+        lastOrderedAt: Date;
+        orderCount: number;
+    }[]>;
 }

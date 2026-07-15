@@ -97,8 +97,8 @@ export declare class UsersController {
             updatedAt: Date;
             userId: string;
             status: import(".prisma/client").$Enums.SubscriptionStatus;
-            expiresAt: Date;
             plan: import(".prisma/client").$Enums.SubscriptionPlan;
+            expiresAt: Date;
             startedAt: Date;
             renewedAt: Date | null;
             cancelledAt: Date | null;
@@ -215,8 +215,8 @@ export declare class UsersController {
             updatedAt: Date;
             userId: string;
             status: import(".prisma/client").$Enums.SubscriptionStatus;
-            expiresAt: Date;
             plan: import(".prisma/client").$Enums.SubscriptionPlan;
+            expiresAt: Date;
             startedAt: Date;
             renewedAt: Date | null;
             cancelledAt: Date | null;

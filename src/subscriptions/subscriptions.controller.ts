@@ -6,13 +6,19 @@ import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('Subscriptions')
-@ApiBearerAuth('access-token')
-@UseGuards(AuthGuard('jwt'))
 @Controller('subscriptions')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
+  @Get('plans')
+  @ApiOperation({ summary: 'List available subscription plans (public)' })
+  getPlans() {
+    return this.subscriptionsService.getPlans();
+  }
+
   @Post()
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Create or upgrade subscription' })
   createOrUpgrade(
     @CurrentUser() user: any,
@@ -22,12 +28,16 @@ export class SubscriptionsController {
   }
 
   @Get('me')
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Get my current subscription' })
   getMySubscription(@CurrentUser() user: any) {
     return this.subscriptionsService.getMySubscription(user.id);
   }
 
   @Delete('me')
+  @ApiBearerAuth('access-token')
+  @UseGuards(AuthGuard('jwt'))
   @ApiOperation({ summary: 'Cancel my subscription' })
   cancel(@CurrentUser() user: any) {
     return this.subscriptionsService.cancel(user.id);

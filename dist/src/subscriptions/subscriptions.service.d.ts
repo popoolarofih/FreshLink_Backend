@@ -11,8 +11,8 @@ export declare class SubscriptionsService {
         updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.SubscriptionStatus;
-        expiresAt: Date;
         plan: import(".prisma/client").$Enums.SubscriptionPlan;
+        expiresAt: Date;
         startedAt: Date;
         renewedAt: Date | null;
         cancelledAt: Date | null;
@@ -25,8 +25,8 @@ export declare class SubscriptionsService {
         updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.SubscriptionStatus;
-        expiresAt: Date;
         plan: import(".prisma/client").$Enums.SubscriptionPlan;
+        expiresAt: Date;
         startedAt: Date;
         renewedAt: Date | null;
         cancelledAt: Date | null;
@@ -39,14 +39,23 @@ export declare class SubscriptionsService {
         updatedAt: Date;
         userId: string;
         status: import(".prisma/client").$Enums.SubscriptionStatus;
-        expiresAt: Date;
         plan: import(".prisma/client").$Enums.SubscriptionPlan;
+        expiresAt: Date;
         startedAt: Date;
         renewedAt: Date | null;
         cancelledAt: Date | null;
         stripeSubscriptionId: string | null;
         stripeCustomerId: string | null;
     }>;
+    getPlans(): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: import(".prisma/client").$Enums.SubscriptionPlan;
+        priceMonthly: import("@prisma/client-runtime-utils").Decimal;
+        features: string[];
+    }[]>;
     processRenewals(): Promise<{
         processed: number;
     }>;

@@ -76,6 +76,9 @@ let SubscriptionsService = class SubscriptionsService {
             data: { status: client_1.SubscriptionStatus.CANCELLED, cancelledAt: new Date() },
         });
     }
+    async getPlans() {
+        return this.prisma.plan.findMany({ orderBy: { priceMonthly: 'asc' } });
+    }
     async processRenewals() {
         const now = new Date();
         const expired = await this.prisma.subscription.findMany({

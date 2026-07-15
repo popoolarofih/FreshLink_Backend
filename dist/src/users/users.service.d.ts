@@ -97,8 +97,8 @@ export declare class UsersService {
             updatedAt: Date;
             userId: string;
             status: import(".prisma/client").$Enums.SubscriptionStatus;
-            expiresAt: Date;
             plan: import(".prisma/client").$Enums.SubscriptionPlan;
+            expiresAt: Date;
             startedAt: Date;
             renewedAt: Date | null;
             cancelledAt: Date | null;

@@ -20,6 +20,8 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { GroqClientModule } from './groq-client/groq-client.module';
 import { MessagesModule } from './messages/messages.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { BuyersModule } from './buyers/buyers.module';
 
 @Module({
   imports: [
@@ -85,6 +87,8 @@ import { MessagesModule } from './messages/messages.module';
     NotificationsModule,
     GroqClientModule,
     MessagesModule,
+    FavoritesModule,
+    BuyersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

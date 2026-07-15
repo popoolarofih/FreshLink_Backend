@@ -22,9 +22,11 @@ const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const roles_guard_1 = require("../common/guards/roles.guard");
 const update_buyer_profile_dto_1 = require("./dto/update-buyer-profile.dto");
 const prisma_service_1 = require("../prisma/prisma.service");
+const buyers_service_1 = require("./buyers.service");
 let BuyersController = class BuyersController {
-    constructor(prisma) {
+    constructor(prisma, buyersService) {
         this.prisma = prisma;
+        this.buyersService = buyersService;
     }
     async getMe(user) {
         const profile = await this.prisma.buyerProfile.findUnique({
@@ -65,6 +67,12 @@ let BuyersController = class BuyersController {
             where: { userId: user.id },
             include: { user: true },
         });
+    }
+    async getAnalytics(user, range = '30d') {
+        return this.buyersService.getAnalytics(user.id, range);
+    }
+    async getReorderHistory(user) {
+        return this.buyersService.getReorderHistory(user.id);
     }
 };
 exports.BuyersController = BuyersController;
@@ -123,11 +131,37 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_buyer_profile_dto_1.UpdateBuyerProfileDto]),
     __metadata("design:returntype", Promise)
 ], BuyersController.prototype, "updateMe", null);
+__decorate([
+    (0, common_1.Get)('me/analytics'),
+    (0, roles_decorator_1.Roles)(client_1.Role.BUYER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get buyer spending analytics' }),
+    (0, swagger_1.ApiQuery)({
+        name: 'range',
+        required: false,
+        enum: ['30d', '90d', '12m'],
+        description: 'Date range for analytics (default: 30d)',
+    }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('range')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], BuyersController.prototype, "getAnalytics", null);
+__decorate([
+    (0, common_1.Get)('me/reorder-history'),
+    (0, roles_decorator_1.Roles)(client_1.Role.BUYER),
+    (0, swagger_1.ApiOperation)({ summary: 'Get providers this buyer has ordered from before' }),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], BuyersController.prototype, "getReorderHistory", null);
 exports.BuyersController = BuyersController = __decorate([
     (0, swagger_1.ApiTags)('Buyers'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, common_1.Controller)('buyers'),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        buyers_service_1.BuyersService])
 ], BuyersController);
 //# sourceMappingURL=buyers.controller.js.map
