@@ -27,7 +27,9 @@ export class ContractsService {
       this.templates[category] = content;
       return content;
     } catch (err) {
-      this.logger.error(`Failed to load contract template for ${category}: ${err}`);
+      this.logger.error(
+        `Failed to load contract template for ${category}: ${err}`,
+      );
       return 'Generate contract draft.';
     }
   }
@@ -37,7 +39,8 @@ export class ContractsService {
     const values: Record<string, string> = {
       buyerName: context.buyerName || 'Buyer',
       providerName: context.providerName || 'Provider',
-      serviceDescription: context.serviceDescription || 'No description provided',
+      serviceDescription:
+        context.serviceDescription || 'No description provided',
       eventDate: context.eventDate || 'N/A',
       agreedPrice: context.agreedPrice ? String(context.agreedPrice) : 'N/A',
       currency: context.currency || 'NGN',
@@ -46,7 +49,10 @@ export class ContractsService {
     };
 
     for (const [key, val] of Object.entries(values)) {
-      result = result.replace(new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'), val);
+      result = result.replace(
+        new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g'),
+        val,
+      );
     }
     return result;
   }
@@ -70,11 +76,13 @@ export class ContractsService {
       },
       {
         title: '4. Standard Cancellation Policy',
-        content: 'Cancellation within 48 hours of service start is subject to a 50% penalty.',
+        content:
+          'Cancellation within 48 hours of service start is subject to a 50% penalty.',
       },
       {
         title: '5. Dispute Resolution',
-        content: 'Any dispute arising under this agreement will be mediated via the FreshLink platform.',
+        content:
+          'Any dispute arising under this agreement will be mediated via the FreshLink platform.',
       },
     ];
 
@@ -84,7 +92,10 @@ export class ContractsService {
 
       const response = await this.groqClient.chat(
         [
-          { role: 'system', content: 'You are an AI assistant drafting contracts in JSON mode.' },
+          {
+            role: 'system',
+            content: 'You are an AI assistant drafting contracts in JSON mode.',
+          },
           { role: 'user', content: promptContent },
         ],
         {
@@ -100,8 +111,13 @@ export class ContractsService {
       const flags: string[] = parsed.flags || [];
 
       // TS rule check checks:
-      if (context.specialRequirements && context.specialRequirements.toLowerCase().includes('no cancellation')) {
-        flags.push('Contract prohibits cancellations completely, deviating from standard platform terms.');
+      if (
+        context.specialRequirements &&
+        context.specialRequirements.toLowerCase().includes('no cancellation')
+      ) {
+        flags.push(
+          'Contract prohibits cancellations completely, deviating from standard platform terms.',
+        );
       }
 
       return {

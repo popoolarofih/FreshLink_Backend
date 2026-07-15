@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -24,7 +17,10 @@ export class PaymentsController {
 
   @Post()
   @Roles(Role.BUYER)
-  @ApiOperation({ summary: 'Initiate payment for a confirmed order (returns Stripe clientSecret)' })
+  @ApiOperation({
+    summary:
+      'Initiate payment for a confirmed order (returns Stripe clientSecret)',
+  })
   initiatePayment(@CurrentUser() user: any, @Body() dto: CreatePaymentDto) {
     return this.paymentsService.initiatePayment(user.id, dto);
   }

@@ -59,7 +59,10 @@ export class UpdateProviderProfileDto {
   @IsBoolean()
   allowsInstantBook?: boolean;
 
-  @ApiPropertyOptional({ type: [String], description: 'Tag names e.g. vegan, halal' })
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Tag names e.g. vegan, halal',
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })

@@ -14,7 +14,9 @@ export class CreateOrderDto {
   @IsUUID()
   providerProfileId: string;
 
-  @ApiProperty({ example: 'Full-day catering for a 200-person corporate event' })
+  @ApiProperty({
+    example: 'Full-day catering for a 200-person corporate event',
+  })
   @IsString()
   serviceDescription: string;
 
@@ -35,7 +37,10 @@ export class CreateOrderDto {
   @IsString()
   location?: string;
 
-  @ApiPropertyOptional({ example: 250000, description: 'Initial quote amount in minor/major units' })
+  @ApiPropertyOptional({
+    example: 250000,
+    description: 'Initial quote amount in minor/major units',
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)

@@ -29,8 +29,13 @@ export class ReviewsService {
     if (order.buyerId !== authorId) {
       throw new ForbiddenException('Only the buyer can review an order.');
     }
-    if (order.status !== OrderStatus.DELIVERED && order.status !== OrderStatus.REVIEWED) {
-      throw new BadRequestException('Order must be DELIVERED before a review can be left.');
+    if (
+      order.status !== OrderStatus.DELIVERED &&
+      order.status !== OrderStatus.REVIEWED
+    ) {
+      throw new BadRequestException(
+        'Order must be DELIVERED before a review can be left.',
+      );
     }
     if (order.review) {
       throw new BadRequestException('A review already exists for this order.');
@@ -86,10 +91,14 @@ export class ReviewsService {
         take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          author: { select: { firstName: true, lastName: true, avatarUrl: true } },
+          author: {
+            select: { firstName: true, lastName: true, avatarUrl: true },
+          },
         },
       }),
-      this.prisma.review.count({ where: { providerProfileId, isPublished: true } }),
+      this.prisma.review.count({
+        where: { providerProfileId, isPublished: true },
+      }),
     ]);
     return { data: reviews, total, page, limit };
   }

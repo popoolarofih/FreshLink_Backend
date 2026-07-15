@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { Role } from '@prisma/client';
+import { Role, ProviderCategory } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -48,7 +48,13 @@ export class AuthService {
         emailVerifyToken,
         // Auto-create the appropriate profile
         ...(dto.role === Role.PROVIDER
-          ? { providerProfile: { create: {} as any } }
+          ? {
+              providerProfile: {
+                create: {
+                  category: dto.category || ProviderCategory.FARMER,
+                },
+              },
+            }
           : { buyerProfile: { create: {} } }),
       },
       select: {

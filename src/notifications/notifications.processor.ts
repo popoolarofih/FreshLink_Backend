@@ -15,7 +15,9 @@ export class NotificationsProcessor {
   private readonly logger = new Logger(NotificationsProcessor.name);
 
   @Process('deliver')
-  async handleDeliver(job: Job<{ notificationId: string } & SendNotificationPayload>) {
+  async handleDeliver(
+    job: Job<{ notificationId: string } & SendNotificationPayload>,
+  ) {
     const { notificationId, userId, type, title, body } = job.data;
     // TODO: replace with real delivery providers
     this.logger.log(

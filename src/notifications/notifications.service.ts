@@ -42,7 +42,10 @@ export class NotificationsService {
     });
 
     // 2. Enqueue delivery job
-    await this.notifQueue.add('deliver', { notificationId: notification.id, ...payload });
+    await this.notifQueue.add('deliver', {
+      notificationId: notification.id,
+      ...payload,
+    });
 
     return notification;
   }

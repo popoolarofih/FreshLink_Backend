@@ -5,7 +5,7 @@
  * Swap providers without touching service logic.
  */
 export interface CreatePaymentIntentParams {
-  amount: number;        // in smallest currency unit (kobo, cents)
+  amount: number; // in smallest currency unit (kobo, cents)
   currency: string;
   orderId: string;
   customerId?: string;
@@ -14,7 +14,7 @@ export interface CreatePaymentIntentParams {
 
 export interface PaymentIntentResult {
   providerIntentId: string;
-  clientSecret?: string;  // Stripe client_secret for front-end confirmation
+  clientSecret?: string; // Stripe client_secret for front-end confirmation
   status: string;
 }
 
@@ -29,7 +29,9 @@ export interface RefundResult {
 }
 
 export interface IPaymentProvider {
-  createPaymentIntent(params: CreatePaymentIntentParams): Promise<PaymentIntentResult>;
+  createPaymentIntent(
+    params: CreatePaymentIntentParams,
+  ): Promise<PaymentIntentResult>;
   capturePayment(intentId: string): Promise<CaptureResult>;
   refundPayment(chargeId: string, amount?: number): Promise<RefundResult>;
 }

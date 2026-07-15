@@ -41,7 +41,10 @@ export class ProvidersController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Update my provider profile (including tags)' })
-  updateMyProfile(@CurrentUser() user: any, @Body() dto: UpdateProviderProfileDto) {
+  updateMyProfile(
+    @CurrentUser() user: any,
+    @Body() dto: UpdateProviderProfileDto,
+  ) {
     return this.providersService.updateProfile(user.id, dto);
   }
 
@@ -67,7 +70,10 @@ export class ProvidersController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.PROVIDER)
   @ApiOperation({ summary: 'Remove a portfolio item' })
-  removePortfolioItem(@CurrentUser() user: any, @Param('itemId') itemId: string) {
+  removePortfolioItem(
+    @CurrentUser() user: any,
+    @Param('itemId') itemId: string,
+  ) {
     return this.providersService.removePortfolioItem(user.id, itemId);
   }
 

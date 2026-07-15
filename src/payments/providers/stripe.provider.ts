@@ -47,7 +47,10 @@ export class StripeProvider implements IPaymentProvider {
     };
   }
 
-  async refundPayment(chargeId: string, amount?: number): Promise<RefundResult> {
+  async refundPayment(
+    chargeId: string,
+    amount?: number,
+  ): Promise<RefundResult> {
     const refund = await this.stripe.refunds.create({
       charge: chargeId,
       ...(amount !== undefined && { amount }),

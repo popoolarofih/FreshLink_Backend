@@ -31,7 +31,9 @@ export class OrdersProcessor {
         break;
       case OrderStatus.DELIVERED:
         // TODO: trigger escrow release prompt to buyer
-        this.logger.log(`[TODO] Prompt buyer to confirm delivery and release funds for ${orderId}`);
+        this.logger.log(
+          `[TODO] Prompt buyer to confirm delivery and release funds for ${orderId}`,
+        );
         break;
       default:
         break;

@@ -49,7 +49,9 @@ export class StripeWebhookController {
     @Headers('stripe-signature') sig: string,
   ) {
     if (!this.webhookSecret) {
-      this.logger.warn('STRIPE_WEBHOOK_SECRET not set — skipping signature verification');
+      this.logger.warn(
+        'STRIPE_WEBHOOK_SECRET not set — skipping signature verification',
+      );
     }
 
     let event: Stripe.Event;
@@ -60,7 +62,9 @@ export class StripeWebhookController {
         this.webhookSecret,
       );
     } catch (err) {
-      this.logger.error(`Webhook signature verification failed: ${(err as Error).message}`);
+      this.logger.error(
+        `Webhook signature verification failed: ${(err as Error).message}`,
+      );
       throw new BadRequestException('Invalid Stripe webhook signature.');
     }
 
@@ -69,14 +73,16 @@ export class StripeWebhookController {
     switch (event.type) {
       case 'payment_intent.amount_capturable_updated': {
         // Card authorised and funds are on hold — mark payment as HELD
-        const pi = event.data.object as Stripe.PaymentIntent;
+        const pi = event.data.object;
         await this.paymentsService.markHeld(pi.id);
         break;
       }
 
       case 'payment_intent.payment_failed': {
-        const pi = event.data.object as Stripe.PaymentIntent;
-        this.logger.warn(`Payment failed for intent ${pi.id}: ${pi.last_payment_error?.message}`);
+        const pi = event.data.object;
+        this.logger.warn(
+          `Payment failed for intent ${pi.id}: ${pi.last_payment_error?.message}`,
+        );
         // TODO: notify buyer via NotificationsService
         break;
       }

@@ -25,7 +25,11 @@ export class NotificationsController {
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {
-    return this.notificationsService.getForUser(user.id, Number(page), Number(limit));
+    return this.notificationsService.getForUser(
+      user.id,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @Patch(':id/read')

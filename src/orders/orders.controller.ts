@@ -41,7 +41,11 @@ export class OrdersController {
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {
-    return this.ordersService.getBuyerOrders(user.id, Number(page), Number(limit));
+    return this.ordersService.getBuyerOrders(
+      user.id,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @Get('mine/provider')
@@ -52,7 +56,11 @@ export class OrdersController {
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {
-    return this.ordersService.getProviderOrders(user.id, Number(page), Number(limit));
+    return this.ordersService.getProviderOrders(
+      user.id,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @Get(':id')
@@ -96,7 +104,9 @@ export class OrdersController {
   }
 
   @Post(':id/contract/sign')
-  @ApiOperation({ summary: 'Sign the contract for an order (buyer or provider)' })
+  @ApiOperation({
+    summary: 'Sign the contract for an order (buyer or provider)',
+  })
   signContract(@CurrentUser() user: any, @Param('id') id: string) {
     return this.ordersService.signContract(id, user.id, user.role);
   }

@@ -6,9 +6,7 @@ import { NotificationsProcessor } from './notifications.processor';
 import { NOTIFICATIONS_QUEUE } from './notifications.constants';
 
 @Module({
-  imports: [
-    BullModule.registerQueue({ name: NOTIFICATIONS_QUEUE }),
-  ],
+  imports: [BullModule.registerQueue({ name: NOTIFICATIONS_QUEUE })],
   controllers: [NotificationsController],
   providers: [NotificationsService, NotificationsProcessor],
   exports: [NotificationsService],

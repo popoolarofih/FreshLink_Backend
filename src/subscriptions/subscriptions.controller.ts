@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SubscriptionsService } from './subscriptions.service';
@@ -21,7 +14,10 @@ export class SubscriptionsController {
 
   @Post()
   @ApiOperation({ summary: 'Create or upgrade subscription' })
-  createOrUpgrade(@CurrentUser() user: any, @Body() dto: CreateSubscriptionDto) {
+  createOrUpgrade(
+    @CurrentUser() user: any,
+    @Body() dto: CreateSubscriptionDto,
+  ) {
     return this.subscriptionsService.createOrUpgrade(user.id, dto);
   }
 

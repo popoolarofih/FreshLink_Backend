@@ -65,6 +65,7 @@ enum NotificationType {
   REVIEW_RECEIVED
   SUBSCRIPTION_RENEWAL
   SUBSCRIPTION_EXPIRED
+  NEW_MESSAGE
   GENERAL
 }
 
@@ -95,6 +96,7 @@ model User {
   reviewsWritten    Review[]        @relation("ReviewAuthor")
   notifications     Notification[]
   subscription      Subscription?
+  sentMessages      Message[]       @relation("SentMessages")
 
   @@map("users")
 }
@@ -283,6 +285,7 @@ model Order {
   statusHistory     OrderStatusHistory[]
   payment           Payment?
   review            Review?
+  messages          Message[]
 
   @@map("orders")
 }
@@ -375,6 +378,24 @@ model Subscription {
   updatedAt   DateTime           @updatedAt
 
   @@map("subscriptions")
+}
+
+// ─────────────────────────────────────
+// MESSAGE  (order-scoped thread)
+// ─────────────────────────────────────
+
+model Message {
+  id        String    @id @default(uuid())
+  orderId   String
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User      @relation("SentMessages", fields: [senderId], references: [id])
+  content   String
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  @@index([orderId, createdAt])
+  @@map("messages")
 }
 
 // ─────────────────────────────────────

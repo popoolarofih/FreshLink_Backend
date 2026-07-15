@@ -87,7 +87,10 @@ export class MatchmakingService {
       const matchCount = providerTags.filter((t) =>
         buyerTags.some((bt) => bt.toLowerCase() === t.toLowerCase()),
       ).length;
-      const tagMatchScore = Math.min(100, (matchCount / buyerTags.length) * 100);
+      const tagMatchScore = Math.min(
+        100,
+        (matchCount / buyerTags.length) * 100,
+      );
       score += (tagMatchScore / 100) * 20;
     } else {
       score += 10; // default moderate score

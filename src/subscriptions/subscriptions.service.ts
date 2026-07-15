@@ -6,7 +6,11 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
-import { NotificationType, SubscriptionPlan, SubscriptionStatus } from '@prisma/client';
+import {
+  NotificationType,
+  SubscriptionPlan,
+  SubscriptionStatus,
+} from '@prisma/client';
 
 // Plan durations in days
 const PLAN_DURATION_DAYS: Record<SubscriptionPlan, number> = {
@@ -23,7 +27,9 @@ export class SubscriptionsService {
   ) {}
 
   async createOrUpgrade(userId: string, dto: CreateSubscriptionDto) {
-    const existing = await this.prisma.subscription.findUnique({ where: { userId } });
+    const existing = await this.prisma.subscription.findUnique({
+      where: { userId },
+    });
 
     const durationDays = PLAN_DURATION_DAYS[dto.plan];
     const now = new Date();
@@ -56,13 +62,17 @@ export class SubscriptionsService {
   }
 
   async getMySubscription(userId: string) {
-    const sub = await this.prisma.subscription.findUnique({ where: { userId } });
+    const sub = await this.prisma.subscription.findUnique({
+      where: { userId },
+    });
     if (!sub) throw new NotFoundException('No subscription found.');
     return sub;
   }
 
   async cancel(userId: string) {
-    const sub = await this.prisma.subscription.findUnique({ where: { userId } });
+    const sub = await this.prisma.subscription.findUnique({
+      where: { userId },
+    });
     if (!sub) throw new NotFoundException('No subscription found.');
     if (sub.status === SubscriptionStatus.CANCELLED) {
       throw new BadRequestException('Subscription already cancelled.');

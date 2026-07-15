@@ -50,10 +50,14 @@ export class OrdersService {
         currency: dto.currency ?? 'NGN',
         specialRequirements: dto.specialRequirements,
         isInstantBooking,
-        status: isInstantBooking ? OrderStatus.CONFIRMED : OrderStatus.REQUESTED,
+        status: isInstantBooking
+          ? OrderStatus.CONFIRMED
+          : OrderStatus.REQUESTED,
         statusHistory: {
           create: {
-            toStatus: isInstantBooking ? OrderStatus.CONFIRMED : OrderStatus.REQUESTED,
+            toStatus: isInstantBooking
+              ? OrderStatus.CONFIRMED
+              : OrderStatus.REQUESTED,
             note: isInstantBooking ? 'Instant booking' : 'Order requested',
           },
         },
@@ -76,12 +80,18 @@ export class OrdersService {
   // Get orders
   // ─────────────────────────────────────────────
 
-  async getOrderById(orderId: string, requesterId: string, requesterRole: Role) {
+  async getOrderById(
+    orderId: string,
+    requesterId: string,
+    requesterRole: Role,
+  ) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: {
         providerProfile: {
-          include: { user: { select: { id: true, firstName: true, lastName: true } } },
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
         },
         statusHistory: { orderBy: { changedAt: 'asc' } },
         payment: true,
@@ -109,7 +119,11 @@ export class OrdersService {
         orderBy: { createdAt: 'desc' },
         include: {
           providerProfile: {
-            include: { user: { select: { firstName: true, lastName: true, avatarUrl: true } } },
+            include: {
+              user: {
+                select: { firstName: true, lastName: true, avatarUrl: true },
+              },
+            },
           },
           payment: true,
         },
@@ -120,7 +134,9 @@ export class OrdersService {
   }
 
   async getProviderOrders(userId: string, page = 1, limit = 20) {
-    const profile = await this.prisma.providerProfile.findUnique({ where: { userId } });
+    const profile = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
     if (!profile) throw new NotFoundException('Provider profile not found.');
 
     const skip = (page - 1) * limit;
@@ -202,7 +218,9 @@ export class OrdersService {
         status: targetStatus,
         isSignedByBuyer,
         isSignedByProvider,
-        ...(targetStatus === OrderStatus.CONTRACT_SIGNED && { contractSignedAt: new Date() }),
+        ...(targetStatus === OrderStatus.CONTRACT_SIGNED && {
+          contractSignedAt: new Date(),
+        }),
         statusHistory: {
           create: {
             fromStatus: order.status,
@@ -210,14 +228,16 @@ export class OrdersService {
             note: shouldAdvance
               ? dto.note || `Order status updated to ${targetStatus}`
               : isBuyer
-              ? 'Contract signed by buyer (awaiting provider signature)'
-              : 'Contract signed by provider (awaiting buyer signature)',
+                ? 'Contract signed by buyer (awaiting provider signature)'
+                : 'Contract signed by provider (awaiting buyer signature)',
           },
         },
       },
       include: {
         providerProfile: {
-          include: { user: { select: { id: true, firstName: true, lastName: true } } },
+          include: {
+            user: { select: { id: true, firstName: true, lastName: true } },
+          },
         },
         statusHistory: { orderBy: { changedAt: 'asc' } },
         payment: true,
@@ -227,8 +247,9 @@ export class OrdersService {
 
     if (shouldAdvance) {
       // Notify both parties
-      const notifyUserId =
-        isProvider ? order.buyerId : order.providerProfile.userId;
+      const notifyUserId = isProvider
+        ? order.buyerId
+        : order.providerProfile.userId;
       await this.notifications.send({
         userId: notifyUserId,
         type: NotificationType.ORDER_STATUS_CHANGE,
@@ -238,11 +259,15 @@ export class OrdersService {
       });
 
       // Enqueue any side effects (contract generation, payment triggers)
-      await this.ordersQueue.add('status-changed', { orderId, newStatus: targetStatus });
+      await this.ordersQueue.add('status-changed', {
+        orderId,
+        newStatus: targetStatus,
+      });
     } else {
       // Notify the counterparty about the signature
-      const notifyUserId =
-        isBuyer ? order.providerProfile.userId : order.buyerId;
+      const notifyUserId = isBuyer
+        ? order.providerProfile.userId
+        : order.buyerId;
       await this.notifications.send({
         userId: notifyUserId,
         type: NotificationType.ORDER_STATUS_CHANGE,
@@ -261,15 +286,22 @@ export class OrdersService {
   // Counter-offer flow
   // ─────────────────────────────────────────────
 
-  async submitCounterOffer(orderId: string, providerId: string, dto: CounterOfferDto) {
+  async submitCounterOffer(
+    orderId: string,
+    providerId: string,
+    dto: CounterOfferDto,
+  ) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { providerProfile: true },
     });
     if (!order) throw new NotFoundException('Order not found.');
-    if (order.providerProfile.userId !== providerId) throw new ForbiddenException();
+    if (order.providerProfile.userId !== providerId)
+      throw new ForbiddenException();
     if (order.status !== OrderStatus.REQUESTED) {
-      throw new BadRequestException('Counter-offers can only be made on REQUESTED orders.');
+      throw new BadRequestException(
+        'Counter-offers can only be made on REQUESTED orders.',
+      );
     }
 
     const updated = await this.prisma.order.update({
@@ -289,10 +321,13 @@ export class OrdersService {
   }
 
   async acceptCounterOffer(orderId: string, buyerId: string) {
-    const order = await this.prisma.order.findUnique({ where: { id: orderId } });
+    const order = await this.prisma.order.findUnique({
+      where: { id: orderId },
+    });
     if (!order) throw new NotFoundException();
     if (order.buyerId !== buyerId) throw new ForbiddenException();
-    if (!order.counterOffer) throw new BadRequestException('No counter-offer to accept.');
+    if (!order.counterOffer)
+      throw new BadRequestException('No counter-offer to accept.');
 
     return this.prisma.order.update({
       where: { id: orderId },
@@ -326,7 +361,10 @@ export class OrdersService {
       },
     });
     if (!order) throw new NotFoundException();
-    if (order.buyerId !== requesterId && order.providerProfile.userId !== requesterId) {
+    if (
+      order.buyerId !== requesterId &&
+      order.providerProfile.userId !== requesterId
+    ) {
       throw new ForbiddenException();
     }
 
@@ -336,7 +374,8 @@ export class OrdersService {
       FARM_SUPPLY: 'farm_supply',
       EVENT_BARTENDING: 'event_bartending',
     };
-    const contractCategory = categoryMap[order.providerProfile.category] || 'catering';
+    const contractCategory =
+      categoryMap[order.providerProfile.category] || 'catering';
 
     const draft = await this.contractsService.generateContract({
       orderId: order.id,
@@ -355,7 +394,11 @@ export class OrdersService {
     return draft;
   }
 
-  async signContract(orderId: string, requesterId: string, requesterRole: Role) {
+  async signContract(
+    orderId: string,
+    requesterId: string,
+    requesterRole: Role,
+  ) {
     // Reuse the existing state-machine transition logic to mark signatures
     return this.updateStatus(orderId, requesterId, requesterRole, {
       status: OrderStatus.CONTRACT_SIGNED,

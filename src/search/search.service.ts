@@ -3,7 +3,10 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SearchParsingService } from './search-parsing/search-parsing.service';
 import { MatchmakingService } from './matchmaking/matchmaking.service';
 import { SearchProvidersDto } from './dto/search-providers.dto';
-import { ParsedSearchFilters, CandidateProvider } from '../groq-client/groq-client.types';
+import {
+  ParsedSearchFilters,
+  CandidateProvider,
+} from '../groq-client/groq-client.types';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
@@ -52,12 +55,19 @@ export class SearchService {
     }
 
     // Price filter: match providers that have at least one pricing item in range
-    if (mergedFilters.minPrice !== undefined || mergedFilters.maxPrice !== undefined) {
+    if (
+      mergedFilters.minPrice !== undefined ||
+      mergedFilters.maxPrice !== undefined
+    ) {
       where.pricingItems = {
         some: {
           basePrice: {
-            ...(mergedFilters.minPrice !== undefined && { gte: mergedFilters.minPrice }),
-            ...(mergedFilters.maxPrice !== undefined && { lte: mergedFilters.maxPrice }),
+            ...(mergedFilters.minPrice !== undefined && {
+              gte: mergedFilters.minPrice,
+            }),
+            ...(mergedFilters.maxPrice !== undefined && {
+              lte: mergedFilters.maxPrice,
+            }),
           },
         },
       };
@@ -103,7 +113,9 @@ export class SearchService {
           pricingItems: true,
           dietaryTags: { include: { tag: true } },
           portfolioItems: { take: 3 },
-          user: { select: { firstName: true, lastName: true, avatarUrl: true } },
+          user: {
+            select: { firstName: true, lastName: true, avatarUrl: true },
+          },
         },
       }),
       this.prisma.providerProfile.count({ where }),

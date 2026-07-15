@@ -7,7 +7,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { Role } from '@prisma/client';
+import { Role, ProviderCategory } from '@prisma/client';
 
 export class RegisterDto {
   @ApiProperty({ example: 'ada@example.com' })
@@ -37,4 +37,12 @@ export class RegisterDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @ApiPropertyOptional({
+    enum: ProviderCategory,
+    example: ProviderCategory.FARMER,
+  })
+  @IsOptional()
+  @IsEnum(ProviderCategory)
+  category?: ProviderCategory;
 }

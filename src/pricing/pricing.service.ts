@@ -22,7 +22,11 @@ export class PricingService {
   private async loadSystemPrompt(): Promise<string> {
     if (this.systemPrompt) return this.systemPrompt;
     try {
-      const filePath = path.join(process.cwd(), 'prompts', 'pricing.prompt.txt');
+      const filePath = path.join(
+        process.cwd(),
+        'prompts',
+        'pricing.prompt.txt',
+      );
       this.systemPrompt = await fs.readFile(filePath, 'utf8');
       return this.systemPrompt;
     } catch (err) {
@@ -47,7 +51,10 @@ export class PricingService {
       if (catLower.includes('catering')) {
         defaultMedian = 150000;
         defaultIqr = 50000;
-      } else if (catLower.includes('meal_prep') || catLower.includes('subscription')) {
+      } else if (
+        catLower.includes('meal_prep') ||
+        catLower.includes('subscription')
+      ) {
         defaultMedian = 50000;
         defaultIqr = 15000;
       } else if (catLower.includes('farm')) {
@@ -70,7 +77,8 @@ export class PricingService {
 
     // Median
     const mid = Math.floor(len / 2);
-    const median = len % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    const median =
+      len % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 
     // Percentile helper
     const getPercentile = (p: number): number => {
@@ -105,7 +113,9 @@ export class PricingService {
     const cleanCity = (context.city || 'default').toLowerCase().trim();
     const cleanCategory = context.category.toLowerCase().trim();
     const cleanRating = context.providerRating ?? 0;
-    const cleanDate = (context.eventDate || new Date().toISOString().split('T')[0]).slice(0, 10);
+    const cleanDate = (
+      context.eventDate || new Date().toISOString().split('T')[0]
+    ).slice(0, 10);
     const pricesStr = prices.join('-');
 
     const cacheKey = `price_suggest:${cleanCategory}:${cleanCity}:${cleanRating}:${cleanDate}:${pricesStr}`;
@@ -167,14 +177,19 @@ export class PricingService {
 
       const suggestedMin = clamp(parsed.suggestedMin ?? stats.min, stats.min);
       const suggestedMax = clamp(parsed.suggestedMax ?? stats.max, stats.max);
-      const recommended = clamp(parsed.recommended ?? stats.median, stats.median);
+      const recommended = clamp(
+        parsed.recommended ?? stats.median,
+        stats.median,
+      );
 
       const result: PriceSuggestion = {
         suggestedMin,
         suggestedMax,
         recommended,
         currency: 'NGN',
-        rationale: parsed.rationale || 'Suggested based on baseline statistical ranges and seasonal adjustments.',
+        rationale:
+          parsed.rationale ||
+          'Suggested based on baseline statistical ranges and seasonal adjustments.',
         aiFallback: false,
       };
 

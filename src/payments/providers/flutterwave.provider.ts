@@ -30,7 +30,10 @@ export class FlutterwaveProvider implements IPaymentProvider {
     throw new Error('FlutterwaveProvider not implemented yet.');
   }
 
-  async refundPayment(_chargeId: string, _amount?: number): Promise<RefundResult> {
+  async refundPayment(
+    _chargeId: string,
+    _amount?: number,
+  ): Promise<RefundResult> {
     throw new Error('FlutterwaveProvider not implemented yet.');
   }
 }

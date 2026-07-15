@@ -30,7 +30,8 @@ export class PaymentsService {
 
     if (!order) throw new NotFoundException('Order not found.');
     if (order.buyerId !== buyerId) throw new ForbiddenException();
-    if (order.payment) throw new BadRequestException('Payment already initiated.');
+    if (order.payment)
+      throw new BadRequestException('Payment already initiated.');
 
     if (
       order.status !== OrderStatus.CONFIRMED &&
@@ -98,7 +99,9 @@ export class PaymentsService {
     if (order.buyerId !== buyerId) throw new ForbiddenException();
 
     if (order.status !== OrderStatus.DELIVERED) {
-      throw new BadRequestException('Funds can only be released once the order is DELIVERED.');
+      throw new BadRequestException(
+        'Funds can only be released once the order is DELIVERED.',
+      );
     }
 
     const payment = order.payment;
@@ -147,7 +150,9 @@ export class PaymentsService {
 
     const payment = order.payment;
     if (!payment || payment.status !== PaymentStatus.HELD) {
-      throw new BadRequestException('Refunds can only be issued on HELD payments.');
+      throw new BadRequestException(
+        'Refunds can only be issued on HELD payments.',
+      );
     }
 
     const refundResult = await this.stripe.refundPayment(
@@ -173,7 +178,8 @@ export class PaymentsService {
     if (!order) throw new NotFoundException();
 
     const isOwner =
-      order.buyerId === requesterId || order.providerProfile.userId === requesterId;
+      order.buyerId === requesterId ||
+      order.providerProfile.userId === requesterId;
     if (!isOwner) throw new ForbiddenException();
 
     return order.payment;

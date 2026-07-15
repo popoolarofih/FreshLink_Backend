@@ -114,7 +114,10 @@ export class GroqClientService implements OnModuleInit {
           completion = await this.groq.chat.completions.create(
             {
               model,
-              messages: messages.map((m) => ({ role: m.role, content: m.content })),
+              messages: messages.map((m) => ({
+                role: m.role,
+                content: m.content,
+              })),
               temperature,
               max_tokens: maxTokens,
               ...(options.jsonMode
@@ -158,8 +161,7 @@ export class GroqClientService implements OnModuleInit {
       } catch (err) {
         lastError = err;
         const latencyMs = Date.now() - started;
-        const isAbort =
-          err instanceof Error && err.name === 'AbortError';
+        const isAbort = err instanceof Error && err.name === 'AbortError';
         const isTimeout = isAbort;
         const errMsg = err instanceof Error ? err.message : String(err);
 
@@ -198,7 +200,11 @@ export class GroqClientService implements OnModuleInit {
    * Fire a minimal 1-token chat completion to verify API reachability.
    * Used by the /health endpoint only.
    */
-  async ping(): Promise<{ reachable: boolean; model: string; latencyMs: number }> {
+  async ping(): Promise<{
+    reachable: boolean;
+    model: string;
+    latencyMs: number;
+  }> {
     const started = Date.now();
     try {
       const controller = new AbortController();

@@ -121,10 +121,7 @@ export interface PriceSuggestion {
 }
 
 export type ContractCategory =
-  | 'catering'
-  | 'meal_prep_subscription'
-  | 'farm_supply'
-  | 'event_bartending';
+  'catering' | 'meal_prep_subscription' | 'farm_supply' | 'event_bartending';
 
 export interface OrderContext {
   orderId: string;

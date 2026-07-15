@@ -19,6 +19,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { GroqClientModule } from './groq-client/groq-client.module';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -41,7 +42,10 @@ import { GroqClientModule } from './groq-client/groq-client.module';
       isGlobal: true,
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const redisUrl = config.get<string>('REDIS_URL', 'redis://localhost:6379');
+        const redisUrl = config.get<string>(
+          'REDIS_URL',
+          'redis://localhost:6379',
+        );
         return {
           stores: [new Keyv({ store: new KeyvRedis(redisUrl) })],
           ttl: 300_000, // default 5-min TTL in ms
@@ -53,7 +57,10 @@ import { GroqClientModule } from './groq-client/groq-client.module';
     BullModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const rawUrl = config.get<string>('BULL_REDIS_URL', 'redis://localhost:6379');
+        const rawUrl = config.get<string>(
+          'BULL_REDIS_URL',
+          'redis://localhost:6379',
+        );
         const redisUrl = new URL(rawUrl);
         return {
           redis: {
@@ -77,9 +84,9 @@ import { GroqClientModule } from './groq-client/groq-client.module';
     SubscriptionsModule,
     NotificationsModule,
     GroqClientModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
-

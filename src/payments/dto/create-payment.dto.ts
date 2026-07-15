@@ -6,7 +6,11 @@ export class CreatePaymentDto {
   @IsUUID()
   orderId: string;
 
-  @ApiPropertyOptional({ enum: ['stripe'], default: 'stripe', description: 'flutterwave coming soon' })
+  @ApiPropertyOptional({
+    enum: ['stripe'],
+    default: 'stripe',
+    description: 'flutterwave coming soon',
+  })
   @IsOptional()
   @IsString()
   provider?: string;

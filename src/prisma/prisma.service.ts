@@ -28,7 +28,7 @@ export class PrismaService
     const adapter = new PrismaPg(connectionString);
     // `as any` is required because NestJS DI calls super() before TypeScript
     // can resolve the generic — the adapter option is fully valid at runtime.
-    super({ adapter } as any);
+    super({ adapter });
   }
 
   async onModuleInit() {

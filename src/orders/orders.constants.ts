@@ -9,7 +9,10 @@ export const ORDERS_QUEUE = 'orders';
 export const ORDER_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   [OrderStatus.REQUESTED]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
   [OrderStatus.CONFIRMED]: [OrderStatus.CONTRACT_SIGNED, OrderStatus.CANCELLED],
-  [OrderStatus.CONTRACT_SIGNED]: [OrderStatus.IN_PROGRESS, OrderStatus.CANCELLED],
+  [OrderStatus.CONTRACT_SIGNED]: [
+    OrderStatus.IN_PROGRESS,
+    OrderStatus.CANCELLED,
+  ],
   [OrderStatus.IN_PROGRESS]: [OrderStatus.DELIVERED],
   [OrderStatus.DELIVERED]: [OrderStatus.REVIEWED],
   [OrderStatus.REVIEWED]: [],

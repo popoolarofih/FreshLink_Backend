@@ -1,6 +1,11 @@
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiTags,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -39,7 +44,9 @@ export class BuyersController {
   async getMe(@CurrentUser() user: any) {
     const profile = await this.prisma.buyerProfile.findUnique({
       where: { userId: user.id },
-      include: { user: { select: { firstName: true, lastName: true, email: true } } },
+      include: {
+        user: { select: { firstName: true, lastName: true, email: true } },
+      },
     });
     return profile;
   }
@@ -74,17 +81,29 @@ export class BuyersController {
     if (dto.fullName) {
       const [firstName, ...rest] = dto.fullName.split(' ');
       const lastName = rest.join(' ') || '';
-      await this.prisma.user.update({ where: { id: user.id }, data: { firstName, lastName } });
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { firstName, lastName },
+      });
     }
 
     if (Object.keys(updates).length > 0) {
-      await this.prisma.buyerProfile.update({ where: { userId: user.id }, data: updates });
+      await this.prisma.buyerProfile.update({
+        where: { userId: user.id },
+        data: updates,
+      });
     }
 
     if (dto.dietaryPreferences) {
-      await this.prisma.buyerProfile.update({ where: { userId: user.id }, data: { dietaryPreferences: dto.dietaryPreferences } });
+      await this.prisma.buyerProfile.update({
+        where: { userId: user.id },
+        data: { dietaryPreferences: dto.dietaryPreferences },
+      });
     }
 
-    return this.prisma.buyerProfile.findUnique({ where: { userId: user.id }, include: { user: true } });
+    return this.prisma.buyerProfile.findUnique({
+      where: { userId: user.id },
+      include: { user: true },
+    });
   }
 }

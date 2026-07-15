@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
@@ -29,6 +37,10 @@ export class ReviewsController {
     @Query('page') page = 1,
     @Query('limit') limit = 20,
   ) {
-    return this.reviewsService.getProviderReviews(id, Number(page), Number(limit));
+    return this.reviewsService.getProviderReviews(
+      id,
+      Number(page),
+      Number(limit),
+    );
   }
 }

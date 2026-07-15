@@ -12,7 +12,9 @@ export class CreateReviewDto {
   @Max(5)
   rating: number;
 
-  @ApiPropertyOptional({ example: 'Absolutely amazing food, very professional!' })
+  @ApiPropertyOptional({
+    example: 'Absolutely amazing food, very professional!',
+  })
   @IsOptional()
   @IsString()
   comment?: string;

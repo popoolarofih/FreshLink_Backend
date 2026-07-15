@@ -44,7 +44,6 @@ export class ProvidersService {
     });
   }
 
-
   // ─────────────────────────────────────────────
   // Profile
   // ─────────────────────────────────────────────
@@ -56,9 +55,19 @@ export class ProvidersService {
         certifications: true,
         portfolioItems: true,
         pricingItems: true,
-        availabilitySlots: { where: { isBooked: false }, orderBy: { startTime: 'asc' } },
+        availabilitySlots: {
+          where: { isBooked: false },
+          orderBy: { startTime: 'asc' },
+        },
         dietaryTags: { include: { tag: true } },
-        user: { select: { firstName: true, lastName: true, email: true, avatarUrl: true } },
+        user: {
+          select: {
+            firstName: true,
+            lastName: true,
+            email: true,
+            avatarUrl: true,
+          },
+        },
       },
     });
     if (!profile) throw new NotFoundException('Provider profile not found.');
@@ -72,7 +81,10 @@ export class ProvidersService {
         certifications: true,
         portfolioItems: true,
         pricingItems: true,
-        availabilitySlots: { where: { isBooked: false }, orderBy: { startTime: 'asc' } },
+        availabilitySlots: {
+          where: { isBooked: false },
+          orderBy: { startTime: 'asc' },
+        },
         dietaryTags: { include: { tag: true } },
         user: { select: { firstName: true, lastName: true, avatarUrl: true } },
       },
@@ -82,7 +94,9 @@ export class ProvidersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProviderProfileDto) {
-    const profile = await this.prisma.providerProfile.findUnique({ where: { userId } });
+    const profile = await this.prisma.providerProfile.findUnique({
+      where: { userId },
+    });
     if (!profile) throw new NotFoundException('Provider profile not found.');
 
     const { tags, ...rest } = dto;
@@ -90,7 +104,9 @@ export class ProvidersService {
     // Handle tags: upsert each tag, then sync the join table
     if (tags && tags.length >= 0) {
       // Delete existing tag relations
-      await this.prisma.providerTag.deleteMany({ where: { providerProfileId: profile.id } });
+      await this.prisma.providerTag.deleteMany({
+        where: { providerProfileId: profile.id },
+      });
 
       if (tags.length > 0) {
         const tagRecords = await Promise.all(
@@ -103,7 +119,10 @@ export class ProvidersService {
           ),
         );
         await this.prisma.providerTag.createMany({
-          data: tagRecords.map((t) => ({ providerProfileId: profile.id, tagId: t.id })),
+          data: tagRecords.map((t) => ({
+            providerProfileId: profile.id,
+            tagId: t.id,
+          })),
           skipDuplicates: true,
         });
       }
@@ -171,7 +190,9 @@ export class ProvidersService {
 
   async removePortfolioItem(userId: string, itemId: string) {
     const profile = await this.getProfile(userId);
-    const item = await this.prisma.portfolioItem.findUnique({ where: { id: itemId } });
+    const item = await this.prisma.portfolioItem.findUnique({
+      where: { id: itemId },
+    });
     if (!item || item.providerProfileId !== profile.id) {
       throw new ForbiddenException('Item not found or does not belong to you.');
     }
@@ -191,7 +212,9 @@ export class ProvidersService {
 
   async removePricingItem(userId: string, itemId: string) {
     const profile = await this.getProfile(userId);
-    const item = await this.prisma.pricingItem.findUnique({ where: { id: itemId } });
+    const item = await this.prisma.pricingItem.findUnique({
+      where: { id: itemId },
+    });
     if (!item || item.providerProfileId !== profile.id) {
       throw new ForbiddenException('Item not found or does not belong to you.');
     }
@@ -215,7 +238,9 @@ export class ProvidersService {
 
   async removeAvailabilitySlot(userId: string, slotId: string) {
     const profile = await this.getProfile(userId);
-    const slot = await this.prisma.availabilitySlot.findUnique({ where: { id: slotId } });
+    const slot = await this.prisma.availabilitySlot.findUnique({
+      where: { id: slotId },
+    });
     if (!slot || slot.providerProfileId !== profile.id) {
       throw new ForbiddenException('Slot not found or does not belong to you.');
     }

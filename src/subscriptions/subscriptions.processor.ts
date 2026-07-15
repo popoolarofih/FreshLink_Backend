@@ -27,7 +27,8 @@ export class SubscriptionsProcessor {
   @Process('send-reminders')
   async handleReminders(_job: Job) {
     this.logger.log('Running subscription renewal reminders...');
-    const result = await this.subscriptionsService.processUpcomingRenewalReminders();
+    const result =
+      await this.subscriptionsService.processUpcomingRenewalReminders();
     this.logger.log(`Sent ${result.reminded} renewal reminder(s).`);
   }
 }
